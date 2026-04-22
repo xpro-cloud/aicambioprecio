@@ -61,26 +61,26 @@ exports.handler = async function(event) {
     ? 'Mercado Libre Argentina (mercadolibre.com.ar)'
     : `${site.name} (${site.url})`;
 
-  const prompt = `Buscá el producto "${query}"${sku ? ` (SKU de referencia: ${sku})` : ''} en ${siteContext}.
+  const prompt = `Usá web search para buscar el precio actual de "${query}" en ${siteContext}.
 
-Devolvé SOLO un JSON válido con esta estructura exacta, sin texto adicional ni markdown:
+Buscá específicamente en ese sitio web. Si encontrás resultados, devolvé SOLO este JSON sin texto adicional:
 {
   "found": true,
   "products": [
     {
-      "title": "nombre del producto",
+      "title": "nombre exacto del producto",
       "price": 123456,
       "currency": "ARS",
-      "url": "https://...",
-      "seller": "vendedor (solo ML)",
-      "condition": "Nuevo o Usado (solo ML)"
+      "url": "https://url-directa-al-producto",
+      "seller": "",
+      "condition": "Nuevo"
     }
   ],
   "note": ""
 }
 
-Máximo 6 productos relevantes. Precios como números enteros sin símbolos. Si no hay resultados: found: false, products: [].`;
-
+Si no encontrás resultados devolvé: {"found": false, "products": [], "note": "sin resultados"}
+Precios como números enteros en pesos argentinos.`;
   const requestBody = JSON.stringify({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1500,
