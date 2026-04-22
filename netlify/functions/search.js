@@ -153,8 +153,17 @@ async function searchSite(query, site, serpKey) {
   const items = await serpSearch(searchQuery, serpKey);
   if (!items.length) return { found: false, products: [] };
 
+  // Filtrar por palabras clave del query
+  const keywords = query.toLowerCase().split(' ').filter(w => w.length > 3);
+  
   const products = items
     .filter(item => isPageTitle(item.title))
+    .filter(item => {
+      const lower = item.title.toLowerCase();
+      // Al menos 2 palabras clave deben estar en el título
+      const matches = keywords.filter(k => lower.includes(k)).length;
+      return matches >= Math.min(2, keywords.length);
+    })
     .map(item => ({
       title: item.title.replace(/\s*[-|·].*$/, '').trim(),
       price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
