@@ -56,7 +56,6 @@ async function serpSearch(searchQuery, serpKey) {
 }
 
 async function searchML(query, serpKey) {
-  // Buscar en ML sin comillas — más resultados
   const searchQuery = `site:mercadolibre.com.ar ${query} -funda -mueble -soporte -correa -estuche`;
   const items = await serpSearch(searchQuery, serpKey);
   if (!items.length) return { found: false, products: [] };
@@ -92,11 +91,8 @@ async function searchML(query, serpKey) {
 
 async function searchSite(query, site, serpKey) {
   const hostname = new URL(site.url).hostname;
-
-  // Buscar sin comillas — más flexible
   const searchQuery = `site:${hostname} ${query}`;
   const items = await serpSearch(searchQuery, serpKey);
-
   if (!items.length) return { found: false, products: [] };
 
   const products = items
@@ -115,13 +111,17 @@ async function searchSite(query, site, serpKey) {
   return { found: products.length > 0, products };
 }
 
-// VERCEL
-module.exports = async function(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+// NETLIFY - sintaxis correcta
+exports.handler = async function(event) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const { query, sku, site } = req.body || {};
+  let parsed;
+  try { parsed = JSON.parse(event.body || '{}'); }
+  catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
+
+  const { query, sku, site } = parsed;
   const serpKey = process.env.SERP_API_KEY;
 
   const searchQuery = sku && sku.trim()
@@ -131,11 +131,11 @@ module.exports = async function(req, res) {
   console.log('Query:', searchQuery, '| Site:', site?.name);
 
   if (!searchQuery || !site) {
-    return res.status(400).json({ error: 'Faltan parametros' });
+    return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parametros' }) };
   }
 
   if (!serpKey) {
-    return res.status(500).json({ error: 'SERP_API_KEY no configurada' });
+    return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
   }
 
   try {
@@ -145,9 +145,13 @@ module.exports = async function(req, res) {
     } else {
       result = await searchSite(searchQuery, site, serpKey);
     }
-    return res.status(200).json(result);
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result)
+    };
   } catch(e) {
     console.error('Error:', e.message);
-    return res.status(500).json({ error: e.message });
+    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
   }
 };
