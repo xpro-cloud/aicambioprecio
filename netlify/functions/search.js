@@ -23,25 +23,6 @@ function httpsGet(url) {
   });
 }
 
-// Normaliza un modelo: saca espacios y guiones -> "PSR-E473" = "PSRE473" = "PSR E473"
-function normalizeModel(str) {
-  return str.replace(/[\s\-_]/g, '').toLowerCase();
-}
-
-// Extrae el modelo del query (parte alfanumérica más específica)
-function extractModel(query) {
-  const match = query.match(/\b([A-Z]{1,6}[\s\-]?[\d]{2,}[\w\s\-]*|[\d]{2,}[\s\-]?[A-Z]{1,6}[\w\s\-]*)\b/i);
-  return match ? match[1].trim() : null;
-}
-
-// Verifica si un título contiene el modelo en cualquiera de sus variantes
-function titleMatchesModel(title, model) {
-  if (!model) return true;
-  const normalizedModel = normalizeModel(model);
-  const normalizedTitle = normalizeModel(title);
-  return normalizedTitle.includes(normalizedModel);
-}
-
 function extractPrice(text) {
   const patterns = [
     /\$\s*([\d]{1,3}(?:[.,][\d]{3})+)/g,
@@ -49,8 +30,7 @@ function extractPrice(text) {
   ];
   const prices = [];
   for (const pattern of patterns) {
-    const matches = [...text.matchAll(pattern)];
-    for (const m of matches) {
+    for (const m of [...text.matchAll(pattern)]) {
       const p = parseInt(m[1].replace(/[.,]/g, ''));
       if (p > 5000 && p < 100000000) prices.push(p);
     }
@@ -58,104 +38,69 @@ function extractPrice(text) {
   return prices.length > 0 ? Math.min(...prices) : 0;
 }
 
-function isProductTitle(title) {
+function isPageTitle(title) {
   if (/\(\d+\)$/.test(title.trim())) return false;
   if (title.split(' ').length < 3) return false;
   const lower = title.toLowerCase();
-  const bad = ['ver todo', 'todos los', 'bienvenidos', 'inicio', 'home page', 'mejores precios siempre', 'distribuidor oficial'];
-  for (const w of bad) if (lower.includes(w)) return false;
-  return true;
+  const bad = ['ver todo', 'todos los', 'bienvenidos', 'inicio', 'home page', 'mejores precios siempre', 'distribuidor oficial', 'tienda online'];
+  return !bad.some(w => lower.includes(w));
 }
 
-// Construye variantes del modelo para el query de búsqueda
-// "PSRE473" -> busca "PSRE473" OR "PSR-E473" OR "PSR E473"
-function buildSearchQuery(hostname, model, fullQuery) {
-  if (!model) return hostname ? `site:${hostname} "${fullQuery}"` : `"${fullQuery}"`;
-  
-  const norm = normalizeModel(model);
-  // Generar variantes insertando guión o espacio en puntos de letra-número
-  const withDash = model.replace(/([A-Za-z])(\d)/g, '$1-$2').replace(/(\d)([A-Za-z])/g, '$1-$2');
-  const withSpace = model.replace(/([A-Za-z])(\d)/g, '$1 $2').replace(/(\d)([A-Za-z])/g, '$1 $2');
-  const noSep = norm.toUpperCase();
-  
-  // Deduplicar variantes
-  const variants = [...new Set([model, withDash, withSpace, noSep])];
-  
-  // Usar la variante más simple entre comillas
-  const bestVariant = variants[0];
-  const brand = fullQuery.replace(new RegExp(model.replace(/[-]/g, '[\\s\\-]?'), 'gi'), '').trim();
-  
-  const sitePrefix = hostname ? `site:${hostname} ` : '';
-  return brand
-    ? `${sitePrefix}"${bestVariant}" ${brand}`
-    : `${sitePrefix}"${bestVariant}"`;
+async function serpSearch(searchQuery, serpKey) {
+  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8&gl=ar&hl=es`;
+  console.log('SerpApi:', searchQuery);
+  const data = await httpsGet(url);
+  console.log('Results:', data.organic_results?.length || 0, '| error:', data.error || 'none');
+  if (data.error || !data.organic_results?.length) return [];
+  return data.organic_results;
 }
 
-async function searchML(query, model, serpKey) {
-  // Intentar ML API directa
-  const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=10&sort=relevance`;
-  console.log('ML API:', url);
-  try {
-    const data = await httpsGet(url);
-    if (data.results && data.results.length > 0) {
-      let results = data.results;
-      if (model) {
-        const filtered = results.filter(p => titleMatchesModel(p.title, model));
-        if (filtered.length > 0) results = filtered;
-        console.log('ML filtered by model:', filtered.length, '/', data.results.length);
-      }
-      const products = results.slice(0, 6).map(p => ({
-        title: p.title,
-        price: Math.round(p.price),
-        currency: p.currency_id,
-        url: p.permalink,
-        seller: p.seller?.nickname || '',
-        condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
-      }));
-      console.log('ML products:', products.length, products[0]?.title, products[0]?.price);
-      return { found: true, products };
-    }
-  } catch(e) {
-    console.log('ML API error:', e.message);
-  }
+async function searchML(query, serpKey) {
+  // Buscar en ML sin comillas — más resultados
+  const searchQuery = `site:mercadolibre.com.ar ${query} -funda -mueble -soporte -correa -estuche`;
+  const items = await serpSearch(searchQuery, serpKey);
+  if (!items.length) return { found: false, products: [] };
 
-  // Fallback SerpApi
-  console.log('ML fallback SerpApi');
-  const searchQuery = buildSearchQuery('mercadolibre.com.ar', model, query);
-  const serpUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8&gl=ar&hl=es`;
-  console.log('SerpApi ML:', searchQuery);
-  const data = await httpsGet(serpUrl);
-  if (data.error || !data.organic_results?.length) return { found: false, products: [] };
-
-  const products = data.organic_results
-    .filter(item => isProductTitle(item.title) && titleMatchesModel(item.title, model))
-    .map(item => ({
-      title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
-      price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
-      currency: 'ARS',
-      url: item.link,
-      seller: item.displayed_link || '',
-      condition: 'Nuevo'
-    }))
+  const products = items
+    .filter(item => isPageTitle(item.title))
+    .filter(item => {
+      const lower = item.title.toLowerCase();
+      return !lower.startsWith('funda') && !lower.startsWith('mueble') &&
+             !lower.startsWith('soporte') && !lower.startsWith('correa') &&
+             !lower.startsWith('estuche');
+    })
+    .map(item => {
+      const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
+                        item.rich_snippet?.bottom?.detected_extensions?.price || 0;
+      const price = richPrice > 0
+        ? Math.round(richPrice)
+        : extractPrice((item.title || '') + ' ' + (item.snippet || ''));
+      return {
+        title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
+        price,
+        currency: 'ARS',
+        url: item.link,
+        seller: item.displayed_link || '',
+        condition: item.snippet?.toLowerCase().includes('usado') ? 'Usado' : 'Nuevo'
+      };
+    })
     .filter(p => p.title.length > 2)
     .slice(0, 6);
 
   return { found: products.length > 0, products };
 }
 
-async function searchSite(query, model, site, serpKey) {
+async function searchSite(query, site, serpKey) {
   const hostname = new URL(site.url).hostname;
-  const searchQuery = buildSearchQuery(hostname, model, query);
-  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
-  console.log('SerpApi site:', site.name, '|', searchQuery);
 
-  const data = await httpsGet(url);
-  console.log('SerpApi', site.name, ':', data.organic_results?.length, 'results | error:', data.error);
+  // Buscar sin comillas — más flexible
+  const searchQuery = `site:${hostname} ${query}`;
+  const items = await serpSearch(searchQuery, serpKey);
 
-  if (data.error || !data.organic_results?.length) return { found: false, products: [] };
+  if (!items.length) return { found: false, products: [] };
 
-  const products = data.organic_results
-    .filter(item => isProductTitle(item.title) && titleMatchesModel(item.title, model))
+  const products = items
+    .filter(item => isPageTitle(item.title))
     .map(item => ({
       title: item.title.replace(/\s*[-|·].*$/, '').trim(),
       price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
@@ -170,45 +115,39 @@ async function searchSite(query, model, site, serpKey) {
   return { found: products.length > 0, products };
 }
 
-exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+// VERCEL
+module.exports = async function(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  let parsed;
-  try { parsed = JSON.parse(event.body || '{}'); }
-  catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
-
-  const { query, sku, site } = parsed;
+  const { query, sku, site } = req.body || {};
   const serpKey = process.env.SERP_API_KEY;
 
-  // Usar SKU si está disponible — más preciso
-  const searchQuery = sku && sku.trim() ? `${sku.trim()} ${query}`.trim() : query;
-  const model = sku && sku.trim() ? sku.trim() : extractModel(query);
+  const searchQuery = sku && sku.trim()
+    ? `${sku.trim()} ${query || ''}`.trim()
+    : (query || '');
 
-  console.log('Query:', searchQuery, '| Model:', model, '| Site:', site?.name);
+  console.log('Query:', searchQuery, '| Site:', site?.name);
 
-  if (!query || !site) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parametros' }) };
+  if (!searchQuery || !site) {
+    return res.status(400).json({ error: 'Faltan parametros' });
+  }
+
+  if (!serpKey) {
+    return res.status(500).json({ error: 'SERP_API_KEY no configurada' });
   }
 
   try {
     let result;
     if (site.isML) {
-      result = await searchML(searchQuery, model, serpKey);
+      result = await searchML(searchQuery, serpKey);
     } else {
-      if (!serpKey) return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
-      result = await searchSite(searchQuery, model, site, serpKey);
+      result = await searchSite(searchQuery, site, serpKey);
     }
-
-    console.log('Final:', result.found, result.products?.length, 'products');
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result)
-    };
+    return res.status(200).json(result);
   } catch(e) {
     console.error('Error:', e.message);
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    return res.status(500).json({ error: e.message });
   }
 };
