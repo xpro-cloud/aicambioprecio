@@ -62,24 +62,29 @@ function isProductTitle(title) {
   return true;
 }
 
-function buildSearchQuery(hostname, model, fullQuery) {
-  if (!model) return hostname ? `site:${hostname} "${fullQuery}"` : `"${fullQuery}"`;
-  const withDash = model.replace(/([A-Za-z])(\d)/g, '$1-$2').replace(/(\d)([A-Za-z])/g, '$1-$2');
-  const brand = fullQuery.replace(new RegExp(model.replace(/[-\s]/g, '[\\s\\-]?'), 'gi'), '').trim();
-  const sitePrefix = hostname ? `site:${hostname} ` : '';
-  return brand ? `${sitePrefix}"${withDash}" ${brand}` : `${sitePrefix}"${withDash}"`;
+// Palabras que indican accesorio, no el producto principal
+const ACCESSORY_WORDS = ['funda', 'mueble', 'soporte', 'cable', 'fuente', 'adaptador', 'pedal', 'atril', 'bolso', 'mochila', 'case', 'tapa', 'cubierta'];
+
+function isAccessory(title) {
+  const lower = title.toLowerCase();
+  return ACCESSORY_WORDS.some(w => lower.startsWith(w) || lower.includes(' ' + w + ' '));
 }
 
 async function searchML(query, model, serpKey) {
-  const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=10&sort=relevance`;
+  // ML API con filtro de disponibilidad
+  const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=20&sort=relevance&status=active`;
   try {
     const data = await httpsGet(url);
     if (data.results && data.results.length > 0) {
-      let results = data.results;
+      let results = data.results
+        .filter(p => p.available_quantity > 0)  // solo con stock
+        .filter(p => !isAccessory(p.title));     // excluir accesorios
+
       if (model) {
         const filtered = results.filter(p => titleMatchesModel(p.title, model));
         if (filtered.length > 0) results = filtered;
       }
+
       const products = results.slice(0, 6).map(p => ({
         title: p.title,
         price: Math.round(p.price),
@@ -88,20 +93,31 @@ async function searchML(query, model, serpKey) {
         seller: p.seller?.nickname || '',
         condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
       }));
-      return { found: true, products };
+
+      if (products.length > 0) {
+        console.log('ML API products:', products.length, products[0]?.title, products[0]?.price);
+        return { found: true, products };
+      }
     }
   } catch(e) {
     console.log('ML API error:', e.message);
   }
 
-  // Fallback SerpApi
-  const searchQuery = buildSearchQuery('mercadolibre.com.ar', model, query);
+  // Fallback SerpApi para ML
+  console.log('ML fallback SerpApi');
+  const modelVariant = model ? model.replace(/([A-Za-z])(\d)/g, '$1-$2') : null;
+  const searchQuery = modelVariant
+    ? `site:mercadolibre.com.ar "${modelVariant}"`
+    : `site:mercadolibre.com.ar "${query}"`;
+
   const serpUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8&gl=ar&hl=es`;
   const data = await httpsGet(serpUrl);
   if (data.error || !data.organic_results?.length) return { found: false, products: [] };
 
   const products = data.organic_results
-    .filter(item => isProductTitle(item.title) && titleMatchesModel(item.title, model))
+    .filter(item => isProductTitle(item.title))
+    .filter(item => !isAccessory(item.title))
+    .filter(item => titleMatchesModel(item.title, model))
     .map(item => ({
       title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
       price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
@@ -118,13 +134,35 @@ async function searchML(query, model, serpKey) {
 
 async function searchSite(query, model, site, serpKey) {
   const hostname = new URL(site.url).hostname;
-  const searchQuery = buildSearchQuery(hostname, model, query);
-  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
-  const data = await httpsGet(url);
+  const modelVariant = model ? model.replace(/([A-Za-z])(\d)/g, '$1-$2') : null;
+
+  // Intentar primero búsqueda exacta con modelo entre comillas
+  let searchQuery = modelVariant
+    ? `site:${hostname} "${modelVariant}"`
+    : `site:${hostname} "${query}"`;
+
+  let url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
+  console.log('SerpApi exact:', site.name, '|', searchQuery);
+
+  let data = await httpsGet(url);
+  console.log('SerpApi exact', site.name, ':', data.organic_results?.length, 'results');
+
+  // Si no hay resultados con búsqueda exacta, intentar sin comillas
+  if (!data.organic_results?.length || data.error) {
+    searchQuery = model
+      ? `site:${hostname} ${model}`
+      : `site:${hostname} ${query}`;
+    url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
+    console.log('SerpApi loose:', site.name, '|', searchQuery);
+    data = await httpsGet(url);
+    console.log('SerpApi loose', site.name, ':', data.organic_results?.length, 'results');
+  }
+
   if (data.error || !data.organic_results?.length) return { found: false, products: [] };
 
   const products = data.organic_results
-    .filter(item => isProductTitle(item.title) && titleMatchesModel(item.title, model))
+    .filter(item => isProductTitle(item.title))
+    .filter(item => titleMatchesModel(item.title, model))
     .map(item => ({
       title: item.title.replace(/\s*[-|·].*$/, '').trim(),
       price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
@@ -139,7 +177,7 @@ async function searchSite(query, model, site, serpKey) {
   return { found: products.length > 0, products };
 }
 
-// VERCEL - sintaxis diferente a Netlify
+// VERCEL
 module.exports = async function(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -148,7 +186,9 @@ module.exports = async function(req, res) {
   const { query, sku, site } = req.body || {};
   const serpKey = process.env.SERP_API_KEY;
 
-  const searchQuery = sku && sku.trim() ? `${sku.trim()} ${query || ''}`.trim() : query;
+  const searchQuery = sku && sku.trim()
+    ? `${sku.trim()} ${query || ''}`.trim()
+    : (query || '');
   const model = sku && sku.trim() ? sku.trim() : extractModel(query || '');
 
   console.log('Query:', searchQuery, '| Model:', model, '| Site:', site?.name);
