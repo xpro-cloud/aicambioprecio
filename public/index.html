@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI CAMBIÓ DE PRECIO!</title>
+<title>AI cambió de precio</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -30,13 +30,13 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
 
-.main { max-width: 980px; margin: 0 auto; padding: 36px 32px; }
+.main { max-width: 900px; margin: 0 auto; padding: 36px 32px; }
 
 .search-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; }
 .panel-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
 .panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
 
-.search-row { display: grid; grid-template-columns: 1fr 200px; gap: 12px; margin-bottom: 20px; }
+.search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
 .input-group label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
 input[type=text] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; width: 100%; }
 input[type=text]:focus { border-color: var(--accent2); }
@@ -46,18 +46,16 @@ input[type=text]:focus { border-color: var(--accent2); }
 .sites-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .btn-sm { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
 .btn-sm:hover { border-color: var(--accent2); color: var(--accent2); }
-
 .sites-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .site-chip { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 13px; }
 .site-chip.ml-chip { border-color: #554a00; color: #ffe600; }
 .site-chip input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; }
-.chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0; margin-left: 2px; line-height: 1; }
+.chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0; margin-left: 2px; }
 .chip-del:hover { color: var(--danger); }
-
 .add-row { display: none; gap: 8px; margin-top: 8px; align-items: flex-end; }
 .add-row.show { display: flex; }
 .add-row .input-group { flex: 1; }
-.add-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; }
+.add-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; }
 .btn-add { background: var(--accent2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
 
 .saved-wrap { margin-top: 18px; display: none; }
@@ -65,21 +63,31 @@ input[type=text]:focus { border-color: var(--accent2); }
 .saved-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .saved-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; transition: all .15s; }
 .saved-chip:hover { border-color: var(--accent); color: var(--accent); }
-.saved-sku { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 .saved-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 0 0 4px; }
-.saved-del:hover { color: var(--danger); }
 
 .btn-search { width: 100%; background: var(--accent); color: #000; border: none; padding: 13px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
 .btn-search:hover { background: #e09520; }
 .btn-search:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
+/* XPRO BANNER */
+.xpro-banner { background: var(--surface); border: 1px solid var(--accent2); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: none; }
+.xpro-banner.show { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.xpro-product-name { font-size: 15px; font-weight: 500; }
+.xpro-product-url { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.xpro-price-box { text-align: right; }
+.xpro-price { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
+.xpro-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.xpro-link { color: var(--accent2); text-decoration: none; font-size: 13px; }
+.xpro-link:hover { text-decoration: underline; }
+
+/* RESULTS */
 .results-wrap { display: none; }
 .results-wrap.show { display: block; }
-.results-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
-.results-query { font-size: 20px; font-weight: 500; }
+.results-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+.results-query { font-size: 18px; font-weight: 500; }
 .results-time { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
-.results-grid { display: grid; gap: 14px; }
+.results-grid { display: grid; gap: 12px; }
 .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); }
 .card-site { display: flex; align-items: center; gap: 9px; }
@@ -92,30 +100,33 @@ input[type=text]:focus { border-color: var(--accent2); }
 .pill-ok { background: #0d2a1f; color: var(--success); }
 .pill-none { background: #2a1515; color: var(--danger); }
 .pill-ml { background: #2a2500; color: #ffe600; border: 1px solid #554a00; }
-.pill-err { background: #2a1f0d; color: var(--accent); }
-
 .card-body { padding: 16px 18px; }
-.skel { background: var(--surface2); border-radius: 6px; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 
 .product-list { display: flex; flex-direction: column; gap: 8px; }
-.product-item { display: grid; grid-template-columns: 22px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
+.product-item { display: grid; grid-template-columns: 22px 1fr auto auto auto; gap: 10px; align-items: center; padding: 10px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
 .p-rank { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; }
 .p-info h4 { font-size: 13px; font-weight: 400; line-height: 1.4; margin-bottom: 2px; }
 .p-info p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
 .p-price { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; white-space: nowrap; text-align: right; }
 .p-price.cheap { color: var(--success); }
 .p-price.expensive { color: var(--danger); }
+.p-diff { font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; text-align: right; padding: 2px 6px; border-radius: 4px; }
+.diff-up { background: #2a1515; color: var(--danger); }
+.diff-down { background: #0d2a1f; color: var(--success); }
+.diff-eq { background: var(--surface); color: var(--muted); }
 .p-link { color: var(--muted); text-decoration: none; font-size: 16px; }
 .p-link:hover { color: var(--accent); }
 
-.card-summary { display: flex; gap: 24px; flex-wrap: wrap; padding: 12px 18px; background: var(--surface2); border-top: 1px solid var(--border); }
+.card-summary { display: flex; gap: 20px; flex-wrap: wrap; padding: 12px 18px; background: var(--surface2); border-top: 1px solid var(--border); }
 .cs-stat .v { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
 .cs-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .v.green { color: var(--success); }
 .v.red { color: var(--danger); }
 .v.yellow { color: var(--accent); }
-.no-result-msg { font-size: 13px; color: var(--muted); padding: 4px 0; }
+.no-result-msg { font-size: 13px; color: var(--muted); }
+
+.skel { background: var(--surface2); border-radius: 6px; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 
 @media(max-width:600px) { .main { padding: 20px 16px; } .search-row { grid-template-columns: 1fr; } }
 </style>
@@ -135,33 +146,33 @@ input[type=text]:focus { border-color: var(--accent2); }
 
 <div class="main">
   <div class="search-panel">
-    <div class="panel-title">Buscar precio en la competencia</div>
-    <div class="panel-sub">Podés buscar por nombre, modelo o SKU — o combinar los dos campos para mayor precisión.</div>
+    <div class="panel-title">Comparar precio con la competencia</div>
+    <div class="panel-sub">Ingresá el SKU de Xpro y el nombre del producto. La herramienta muestra el precio de Xpro y lo compara con ML y los sitios competidores.</div>
 
     <div class="search-row">
       <div class="input-group">
-        <label>Nombre o modelo del producto</label>
-        <input type="text" id="q" placeholder="Ej: Yamaha PSRE473 · Fender CD-60SCE · RCF ART 915-A" />
+        <label>SKU Xpro (obligatorio)</label>
+        <input type="text" id="sku" placeholder="Ej: 250-8210-533" />
       </div>
       <div class="input-group">
-        <label>SKU interno (más preciso)</label>
-        <input type="text" id="sku" placeholder="Ej: PSRE473 · CD-60SCE" />
+        <label>Nombre del producto (para buscar en competencia)</label>
+        <input type="text" id="q" placeholder="Ej: Yamaha PSRE473 · Fender CD-60SCE" />
       </div>
     </div>
 
     <div class="sites-row">
-      <span class="section-label" style="margin:0">Sitios a monitorear</span>
+      <span class="section-label" style="margin:0">Sitios a comparar</span>
       <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
     </div>
     <div class="sites-grid" id="sitesGrid"></div>
     <div class="add-row" id="addRow">
       <div class="input-group">
-        <label>URL del sitio</label>
+        <label>URL</label>
         <input type="text" id="newUrl" placeholder="https://sitio.com.ar" />
       </div>
       <div class="input-group">
         <label>Nombre</label>
-        <input type="text" id="newName" placeholder="Nombre del sitio" />
+        <input type="text" id="newName" placeholder="Nombre" />
       </div>
       <button class="btn-add" onclick="addSite()">Agregar</button>
     </div>
@@ -171,9 +182,22 @@ input[type=text]:focus { border-color: var(--accent2); }
       <div class="saved-chips" id="savedChips"></div>
     </div>
 
-    <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Buscar precios</button>
+    <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
   </div>
 
+  <!-- PRECIO XPRO -->
+  <div class="xpro-banner" id="xproBanner">
+    <div>
+      <div class="xpro-product-name" id="xproName">—</div>
+      <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en Xpro ↗</a>
+    </div>
+    <div class="xpro-price-box">
+      <div class="xpro-label">Precio Xpro</div>
+      <div class="xpro-price" id="xproPrice">—</div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS COMPETENCIA -->
   <div class="results-wrap" id="resultsWrap">
     <div class="results-top">
       <div class="results-query" id="resultsTitle"></div>
@@ -195,9 +219,9 @@ const DEFAULT_SITES = [
 
 let sites = JSON.parse(localStorage.getItem('xpm_sites') || 'null') || DEFAULT_SITES;
 let saved = JSON.parse(localStorage.getItem('xpm_saved') || '[]');
+let xproPrice = 0;
 
 function saveSites() { localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
-
 function renderSites() {
   document.getElementById('sitesGrid').innerHTML = sites.map(s => `
     <div class="site-chip ${s.isML ? 'ml-chip' : ''}">
@@ -206,11 +230,9 @@ function renderSites() {
       ${!s.isML ? `<button class="chip-del" onclick="removeSite('${s.id}')">×</button>` : ''}
     </div>`).join('');
 }
-
 function toggleSite(id, val) { sites = sites.map(s => s.id===id?{...s,enabled:val}:s); saveSites(); }
 function removeSite(id) { sites = sites.filter(s=>s.id!==id); saveSites(); renderSites(); }
 function toggleAdd() { document.getElementById('addRow').classList.toggle('show'); }
-
 function addSite() {
   const url = document.getElementById('newUrl').value.trim();
   const name = document.getElementById('newName').value.trim();
@@ -227,17 +249,15 @@ function renderSaved() {
   wrap.classList.add('show');
   document.getElementById('savedChips').innerHTML = saved.map((s,i) => `
     <div class="saved-chip" onclick="loadSaved(${i})">
-      ${s.q || s.sku}${s.sku && s.q ? ` <span class="saved-sku">${s.sku}</span>` : ''}
+      ${s.sku}${s.q ? ` · ${s.q}` : ''}
       <button class="saved-del" onclick="delSaved(event,${i})">×</button>
     </div>`).join('');
 }
-
 function loadSaved(i) {
-  document.getElementById('q').value = saved[i].q || '';
   document.getElementById('sku').value = saved[i].sku || '';
+  document.getElementById('q').value = saved[i].q || '';
   runSearch();
 }
-
 function delSaved(e,i) {
   e.stopPropagation();
   saved.splice(i,1);
@@ -245,36 +265,47 @@ function delSaved(e,i) {
   renderSaved();
 }
 
+async function callApi(payload) {
+  const res = await fetch('/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
 async function runSearch() {
-  const q = document.getElementById('q').value.trim();
   const sku = document.getElementById('sku').value.trim();
+  const q = document.getElementById('q').value.trim();
 
-  // Permitir buscar con solo SKU o solo nombre
-  if (!q && !sku) {
-    document.getElementById('q').focus();
-    return;
-  }
+  if (!sku) { document.getElementById('sku').focus(); return; }
 
-  // El query efectivo: si hay nombre usarlo, si no usar el SKU como nombre
-  const effectiveQuery = q || sku;
-
-  saved = saved.filter(s => !(s.q === q && s.sku === sku));
-  saved.unshift({ q, sku });
+  saved = saved.filter(s => !(s.sku === sku && s.q === q));
+  saved.unshift({ sku, q });
   if (saved.length > 12) saved.pop();
   localStorage.setItem('xpm_saved', JSON.stringify(saved));
   renderSaved();
 
-  const activeSites = sites.filter(s => s.enabled);
   const btn = document.getElementById('btnSearch');
   btn.disabled = true; btn.textContent = 'Buscando...';
 
-  const resultsWrap = document.getElementById('resultsWrap');
-  resultsWrap.classList.add('show');
+  // Reset UI
+  xproPrice = 0;
+  const banner = document.getElementById('xproBanner');
+  banner.classList.remove('show');
+  document.getElementById('xproPrice').textContent = 'Cargando...';
+  document.getElementById('xproName').textContent = '...';
 
-  const displayLabel = [q, sku ? `[${sku}]` : ''].filter(Boolean).join(' ');
-  document.getElementById('resultsTitle').innerHTML = `"${displayLabel}"`;
+  // Fetch Xpro price + competition simultaneously
+  const activeSites = sites.filter(s => s.enabled);
+  const searchQuery = q || sku;
+
+  document.getElementById('resultsTitle').innerHTML = `"${searchQuery}"`;
   document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
+  document.getElementById('resultsWrap').classList.add('show');
+  banner.classList.add('show');
 
+  // Show skeletons
   document.getElementById('resultsGrid').innerHTML = activeSites.map(s => `
     <div class="result-card" id="card_${s.id}">
       <div class="card-header">
@@ -290,19 +321,37 @@ async function runSearch() {
       </div>
     </div>`).join('');
 
-  await Promise.all(activeSites.map(site => searchSite(site, effectiveQuery, sku)));
-  btn.disabled = false; btn.textContent = '🔍 Buscar precios';
+  // Fetch Xpro price
+  const xproFetch = callApi({ query: '', sku, site: { id: 'xpro' } }).then(data => {
+    if (data.found || data.price) {
+      xproPrice = data.price || 0;
+      document.getElementById('xproName').textContent = data.name || sku;
+      document.getElementById('xproPrice').textContent = xproPrice > 0
+        ? `$ ${Math.round(xproPrice).toLocaleString('es-AR')}`
+        : 'Sin precio';
+      const link = document.getElementById('xproLink');
+      link.href = `https://ar.xprostore.com/${sku}`;
+    } else {
+      document.getElementById('xproName').textContent = sku;
+      document.getElementById('xproPrice').textContent = 'No encontrado';
+    }
+  }).catch(() => {
+    document.getElementById('xproPrice').textContent = 'Error';
+  });
+
+  // Fetch competition
+  const competitionFetch = Promise.all(
+    activeSites.map(site => searchSite(site, searchQuery))
+  );
+
+  await Promise.all([xproFetch, competitionFetch]);
+  btn.disabled = false; btn.textContent = '🔍 Comparar precios';
 }
 
-async function searchSite(site, query, sku) {
+async function searchSite(site, query) {
   const cardEl = document.getElementById('card_' + site.id);
   try {
-    const res = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, sku, site })
-    });
-    const result = await res.json();
+    const result = await callApi({ query, sku: '', site });
     renderCard(cardEl, site, result);
   } catch(e) {
     renderCard(cardEl, site, { found: false, products: [], error: e.message });
@@ -316,7 +365,7 @@ function renderCard(cardEl, site, result) {
   const maxP = prices.length ? Math.max(...prices) : 0;
 
   const pill = result.error
-    ? `<span class="card-pill pill-err">error</span>`
+    ? `<span class="card-pill" style="background:#2a1f0d;color:var(--accent)">error</span>`
     : products.length > 0
       ? site.isML
         ? `<span class="card-pill pill-ml">${products.length} resultados</span>`
@@ -325,9 +374,9 @@ function renderCard(cardEl, site, result) {
 
   let body = '';
   if (result.error) {
-    body = `<p class="no-result-msg">Error: ${result.error}</p>`;
+    body = `<p class="no-result-msg">Error al consultar.</p>`;
   } else if (!products.length) {
-    body = `<p class="no-result-msg">No se encontraron resultados en ${site.name}.</p>`;
+    body = `<p class="no-result-msg">Sin resultados en ${site.name}.</p>`;
   } else {
     const items = products.map((p, i) => {
       let pc = '';
@@ -336,13 +385,28 @@ function renderCard(cardEl, site, result) {
         else if (p.price >= maxP * 0.95) pc = 'expensive';
       }
       const priceStr = p.price > 0
-        ? `$ ${Math.round(p.price).toLocaleString('es-AR')}${p.currency === 'USD' ? ' USD' : ''}`
-        : '<span style="color:var(--muted);font-size:12px">Ver precio ↗</span>';
+        ? `$ ${Math.round(p.price).toLocaleString('es-AR')}`
+        : `<span style="color:var(--muted);font-size:12px">Ver precio</span>`;
+
+      // Comparativa vs Xpro
+      let diffHtml = '';
+      if (p.price > 0 && xproPrice > 0) {
+        const diff = Math.round(((xproPrice - p.price) / p.price) * 100);
+        if (Math.abs(diff) >= 2) {
+          diffHtml = diff > 0
+            ? `<span class="p-diff diff-up">Xpro +${diff}%</span>`
+            : `<span class="p-diff diff-down">Xpro ${diff}%</span>`;
+        } else {
+          diffHtml = `<span class="p-diff diff-eq">≈ igual</span>`;
+        }
+      }
+
       const sub = [p.seller, p.condition].filter(Boolean).join(' · ');
       return `<div class="product-item">
         <div class="p-rank">${i+1}</div>
         <div class="p-info"><h4>${p.title}</h4>${sub ? `<p>${sub}</p>` : ''}</div>
         <div class="p-price ${pc}">${priceStr}</div>
+        ${diffHtml}
         ${p.url ? `<a href="${p.url}" target="_blank" class="p-link">↗</a>` : '<span></span>'}
       </div>`;
     }).join('');
@@ -352,6 +416,7 @@ function renderCard(cardEl, site, result) {
         <div class="cs-stat"><div class="v green">$ ${Math.round(minP).toLocaleString('es-AR')}</div><div class="l">Más bajo</div></div>
         <div class="cs-stat"><div class="v red">$ ${Math.round(maxP).toLocaleString('es-AR')}</div><div class="l">Más alto</div></div>
         ${prices.length > 1 ? `<div class="cs-stat"><div class="v yellow">$ ${Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('es-AR')}</div><div class="l">Promedio</div></div>` : ''}
+        ${xproPrice > 0 && minP > 0 ? `<div class="cs-stat"><div class="v ${xproPrice <= minP*1.05 ? 'green' : 'red'}">${xproPrice <= minP*1.05 ? '✓ Competitivo' : '↑ Más caro'}</div><div class="l">Xpro vs este sitio</div></div>` : ''}
       </div>`;
     }
   }
@@ -367,8 +432,8 @@ function renderCard(cardEl, site, result) {
     <div class="card-body">${body}</div>`;
 }
 
-document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
 document.getElementById('sku').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
 renderSites();
 renderSaved();
 </script>
