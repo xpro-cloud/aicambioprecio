@@ -62,73 +62,51 @@ function isProductTitle(title) {
   return true;
 }
 
-// Palabras que indican accesorio, no el producto principal
-const ACCESSORY_WORDS = ['funda', 'mueble', 'soporte', 'cable', 'fuente', 'adaptador', 'pedal', 'atril', 'bolso', 'mochila', 'case', 'tapa', 'cubierta'];
+const ACCESSORY_WORDS = ['funda', 'mueble', 'soporte', 'cable ', 'fuente ', 'adaptador', 'pedal ', 'atril', 'bolso', 'mochila', 'correa'];
 
 function isAccessory(title) {
   const lower = title.toLowerCase();
-  return ACCESSORY_WORDS.some(w => lower.startsWith(w) || lower.includes(' ' + w + ' '));
+  return ACCESSORY_WORDS.some(w => lower.startsWith(w.trim()));
 }
 
-async function searchML(query, model, serpKey) {
-  // ML API con filtro de disponibilidad
-  const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=20&sort=relevance&status=active`;
-  try {
-    const data = await httpsGet(url);
-    if (data.results && data.results.length > 0) {
-      let results = data.results
-        .filter(p => p.available_quantity > 0)  // solo con stock
-        .filter(p => !isAccessory(p.title));     // excluir accesorios
+async function searchML(query, model) {
+  const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=20&sort=relevance`;
+  const data = await httpsGet(url);
 
-      if (model) {
-        const filtered = results.filter(p => titleMatchesModel(p.title, model));
-        if (filtered.length > 0) results = filtered;
-      }
-
-      const products = results.slice(0, 6).map(p => ({
-        title: p.title,
-        price: Math.round(p.price),
-        currency: p.currency_id,
-        url: p.permalink,
-        seller: p.seller?.nickname || '',
-        condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
-      }));
-
-      if (products.length > 0) {
-        console.log('ML API products:', products.length, products[0]?.title, products[0]?.price);
-        return { found: true, products };
-      }
-    }
-  } catch(e) {
-    console.log('ML API error:', e.message);
+  if (!data.results || data.results.length === 0) {
+    console.log('ML API no results or error:', data.error || data.message);
+    return { found: false, products: [] };
   }
 
-  // Fallback SerpApi para ML
-  console.log('ML fallback SerpApi');
-  const modelVariant = model ? model.replace(/([A-Za-z])(\d)/g, '$1-$2') : null;
-  const searchQuery = modelVariant
-    ? `site:mercadolibre.com.ar "${modelVariant}"`
-    : `site:mercadolibre.com.ar "${query}"`;
+  console.log('ML API raw results:', data.results.length);
 
-  const serpUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8&gl=ar&hl=es`;
-  const data = await httpsGet(serpUrl);
-  if (data.error || !data.organic_results?.length) return { found: false, products: [] };
+  // Filtrar con stock disponible
+  let results = data.results.filter(p => p.available_quantity > 0);
+  console.log('ML after stock filter:', results.length);
 
-  const products = data.organic_results
-    .filter(item => isProductTitle(item.title))
-    .filter(item => !isAccessory(item.title))
-    .filter(item => titleMatchesModel(item.title, model))
-    .map(item => ({
-      title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
-      price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
-      currency: 'ARS',
-      url: item.link,
-      seller: item.displayed_link || '',
-      condition: 'Nuevo'
-    }))
-    .filter(p => p.title.length > 2)
-    .slice(0, 6);
+  // Filtrar accesorios
+  const noAccessory = results.filter(p => !isAccessory(p.title));
+  if (noAccessory.length > 0) results = noAccessory;
+  console.log('ML after accessory filter:', results.length);
 
+  // Filtrar por modelo — solo si quedan resultados después
+  if (model) {
+    const withModel = results.filter(p => titleMatchesModel(p.title, model));
+    console.log('ML after model filter:', withModel.length);
+    if (withModel.length > 0) results = withModel;
+    // Si no queda nada con el modelo, usar los sin accesorios igual
+  }
+
+  const products = results.slice(0, 6).map(p => ({
+    title: p.title,
+    price: Math.round(p.price),  // precio directo de ML API — siempre disponible
+    currency: p.currency_id,
+    url: p.permalink,
+    seller: p.seller?.nickname || '',
+    condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
+  }));
+
+  console.log('ML final products:', products.length, products[0]?.title, products[0]?.price);
   return { found: products.length > 0, products };
 }
 
@@ -136,33 +114,38 @@ async function searchSite(query, model, site, serpKey) {
   const hostname = new URL(site.url).hostname;
   const modelVariant = model ? model.replace(/([A-Za-z])(\d)/g, '$1-$2') : null;
 
-  // Intentar primero búsqueda exacta con modelo entre comillas
+  // Intento 1: búsqueda exacta con modelo entre comillas
   let searchQuery = modelVariant
     ? `site:${hostname} "${modelVariant}"`
     : `site:${hostname} "${query}"`;
 
   let url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
   console.log('SerpApi exact:', site.name, '|', searchQuery);
-
   let data = await httpsGet(url);
-  console.log('SerpApi exact', site.name, ':', data.organic_results?.length, 'results');
+  console.log('SerpApi exact', site.name, ':', data.organic_results?.length || 0, 'results');
 
-  // Si no hay resultados con búsqueda exacta, intentar sin comillas
-  if (!data.organic_results?.length || data.error) {
+  // Intento 2: sin comillas si no hay resultados
+  if (!data.organic_results?.length) {
     searchQuery = model
       ? `site:${hostname} ${model}`
       : `site:${hostname} ${query}`;
     url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
     console.log('SerpApi loose:', site.name, '|', searchQuery);
     data = await httpsGet(url);
-    console.log('SerpApi loose', site.name, ':', data.organic_results?.length, 'results');
+    console.log('SerpApi loose', site.name, ':', data.organic_results?.length || 0, 'results');
   }
 
   if (data.error || !data.organic_results?.length) return { found: false, products: [] };
 
-  const products = data.organic_results
-    .filter(item => isProductTitle(item.title))
-    .filter(item => titleMatchesModel(item.title, model))
+  let items = data.organic_results.filter(item => isProductTitle(item.title));
+
+  // Aplicar filtro de modelo solo si quedan resultados
+  if (model) {
+    const withModel = items.filter(item => titleMatchesModel(item.title, model));
+    if (withModel.length > 0) items = withModel;
+  }
+
+  const products = items
     .map(item => ({
       title: item.title.replace(/\s*[-|·].*$/, '').trim(),
       price: extractPrice((item.title || '') + ' ' + (item.snippet || '')),
@@ -200,7 +183,7 @@ module.exports = async function(req, res) {
   try {
     let result;
     if (site.isML) {
-      result = await searchML(searchQuery, model, serpKey);
+      result = await searchML(searchQuery, model);
     } else {
       if (!serpKey) return res.status(500).json({ error: 'SERP_API_KEY no configurada' });
       result = await searchSite(searchQuery, model, site, serpKey);
