@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI cambió de precio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --surface2: #1c1c27;
+  --border: #2a2a3a;
+  --accent: #f5a623;
+  --accent2: #7c6af5;
+  --text: #e8e8f0;
+  --muted: #6b6b80;
+  --success: #3ecf8e;
+  --danger: #f56565;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+.header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.logo-text { font-size: 16px; font-weight: 600; }
+.logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; }
+.status { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+.main { max-width: 980px; margin: 0 auto; padding: 36px 32px; }
+
+.search-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; }
+.panel-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+
+.search-row { display: grid; grid-template-columns: 1fr 180px; gap: 12px; margin-bottom: 20px; }
+.input-group label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+input[type=text], input[type=password] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; width: 100%; }
+input:focus { border-color: var(--accent2); }
+::placeholder { color: var(--muted); }
+
+.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; display: block; }
+.sites-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.btn-sm { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.btn-sm:hover { border-color: var(--accent2); color: var(--accent2); }
+
+.sites-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.site-chip { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 13px; }
+.site-chip.ml-chip { border-color: #554a00; color: #ffe600; }
+.site-chip input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; }
+.chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0; margin-left: 2px; line-height: 1; }
+.chip-del:hover { color: var(--danger); }
+
+.add-row { display: none; gap: 8px; margin-top: 8px; align-items: flex-end; }
+.add-row.show { display: flex; }
+.add-row .input-group { flex: 1; }
+.add-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; }
+.btn-add { background: var(--accent2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+
+.saved-wrap { margin-top: 18px; display: none; }
+.saved-wrap.show { display: block; }
+.saved-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.saved-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; transition: all .15s; }
+.saved-chip:hover { border-color: var(--accent); color: var(--accent); }
+.saved-sku { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.saved-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 0 0 4px; }
+.saved-del:hover { color: var(--danger); }
+
+.btn-search { width: 100%; background: var(--accent); color: #000; border: none; padding: 13px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
+.btn-search:hover { background: #e09520; }
+.btn-search:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+/* RESULTS */
+.results-wrap { display: none; }
+.results-wrap.show { display: block; }
+.results-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+.results-query { font-size: 20px; font-weight: 500; }
+.results-time { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+.results-grid { display: grid; gap: 14px; }
+
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.card-site { display: flex; align-items: center; gap: 9px; }
+.card-favicon { width: 18px; height: 18px; border-radius: 3px; }
+.card-name { font-size: 13px; font-weight: 500; }
+.card-url { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.card-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; }
+.pill-loading { background: var(--surface); color: var(--muted); border: 1px solid var(--border); animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.4} }
+.pill-ok { background: #0d2a1f; color: var(--success); }
+.pill-none { background: #2a1515; color: var(--danger); }
+.pill-ml { background: #2a2500; color: #ffe600; border: 1px solid #554a00; }
+.pill-err { background: #2a1f0d; color: var(--accent); }
+
+.card-body { padding: 16px 18px; }
+.skel { background: var(--surface2); border-radius: 6px; animation: shimmer 1.5s infinite; background-size: 200% 100%; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+.product-list { display: flex; flex-direction: column; gap: 8px; }
+.product-item { display: grid; grid-template-columns: 22px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
+.p-rank { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; }
+.p-info h4 { font-size: 13px; font-weight: 400; line-height: 1.4; margin-bottom: 2px; }
+.p-info p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.p-price { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; white-space: nowrap; text-align: right; }
+.p-price.cheap { color: var(--success); }
+.p-price.expensive { color: var(--danger); }
+.p-link { color: var(--muted); text-decoration: none; font-size: 16px; }
+.p-link:hover { color: var(--accent); }
+
+.card-summary { display: flex; gap: 24px; flex-wrap: wrap; padding: 12px 18px; background: var(--surface2); border-top: 1px solid var(--border); }
+.cs-stat .v { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
+.cs-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.v.green { color: var(--success); }
+.v.red { color: var(--danger); }
+.v.yellow { color: var(--accent); }
+
+.no-result-msg { font-size: 13px; color: var(--muted); padding: 4px 0; }
+
+@media(max-width:600px) { .main { padding: 20px 16px; } .search-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">💰</div>
+    <div>
+      <div class="logo-text">AI cambió de precio</div>
+      <div class="logo-sub">Monitor de precios · Xpro</div>
+    </div>
+  </div>
+  <div class="status"><div class="dot"></div>IA activa</div>
+</div>
+
+<div class="main">
+  <div class="search-panel">
+    <div class="panel-title">Buscar precio en la competencia</div>
+    <div class="panel-sub">Escribí el nombre o modelo del producto. La IA busca en todos los sitios seleccionados y trae los precios en tiempo real.</div>
+
+    <div class="search-row">
+      <div class="input-group">
+        <label>Nombre o modelo del producto</label>
+        <input type="text" id="q" placeholder="Ej: RCF ART 915-A · Yamaha PSRE473 · Fender CD-60SCE" />
+      </div>
+      <div class="input-group">
+        <label>SKU interno</label>
+        <input type="text" id="sku" placeholder="Ej: CD-60SCE" />
+      </div>
+    </div>
+
+    <div class="sites-row">
+      <span class="section-label" style="margin:0">Sitios a monitorear</span>
+      <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
+    </div>
+    <div class="sites-grid" id="sitesGrid"></div>
+    <div class="add-row" id="addRow">
+      <div class="input-group">
+        <label>URL del sitio</label>
+        <input type="text" id="newUrl" placeholder="https://sitio.com.ar" />
+      </div>
+      <div class="input-group">
+        <label>Nombre</label>
+        <input type="text" id="newName" placeholder="Nombre" />
+      </div>
+      <button class="btn-add" onclick="addSite()">Agregar</button>
+    </div>
+
+    <div class="saved-wrap" id="savedWrap">
+      <span class="section-label">Búsquedas recientes</span>
+      <div class="saved-chips" id="savedChips"></div>
+    </div>
+
+    <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Buscar precios</button>
+  </div>
+
+  <div class="results-wrap" id="resultsWrap">
+    <div class="results-top">
+      <div class="results-query" id="resultsTitle"></div>
+      <div class="results-time" id="resultsTime"></div>
+    </div>
+    <div class="results-grid" id="resultsGrid"></div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_SITES = [
+  { id:'ml',           name:'Mercado Libre',  url:'https://www.mercadolibre.com.ar', enabled:true, isML:true },
+  { id:'larpon',       name:'Larpon',         url:'https://larpon.com.ar',           enabled:true },
+  { id:'todomusica',   name:'Todo Música',    url:'https://todomusica.com.ar',       enabled:true },
+  { id:'mariogomez',   name:'Mario Gomez',    url:'https://mariogomez.com.ar',       enabled:true },
+  { id:'tecnowestune', name:'Tecnowestune',   url:'https://www.tecnowestune.com',    enabled:true },
+  { id:'lafusa',       name:'La Fusa',        url:'https://www.lafusa.com.ar',       enabled:true },
+];
+
+let sites = JSON.parse(localStorage.getItem('xpm_sites') || 'null') || DEFAULT_SITES;
+let saved = JSON.parse(localStorage.getItem('xpm_saved') || '[]');
+
+function saveSites() { localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
+
+function renderSites() {
+  document.getElementById('sitesGrid').innerHTML = sites.map(s => `
+    <div class="site-chip ${s.isML ? 'ml-chip' : ''}">
+      <input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSite('${s.id}',this.checked)">
+      ${s.name}
+      ${!s.isML ? `<button class="chip-del" onclick="removeSite('${s.id}')">×</button>` : ''}
+    </div>`).join('');
+}
+
+function toggleSite(id, val) { sites = sites.map(s => s.id===id?{...s,enabled:val}:s); saveSites(); }
+function removeSite(id) { sites = sites.filter(s=>s.id!==id); saveSites(); renderSites(); }
+function toggleAdd() { document.getElementById('addRow').classList.toggle('show'); }
+
+function addSite() {
+  const url = document.getElementById('newUrl').value.trim();
+  const name = document.getElementById('newName').value.trim();
+  if (!url || !name) return;
+  sites.push({ id:'c_'+Date.now(), name, url, enabled:true });
+  saveSites(); renderSites();
+  ['newUrl','newName'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('addRow').classList.remove('show');
+}
+
+function renderSaved() {
+  const wrap = document.getElementById('savedWrap');
+  if (!saved.length) { wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+  document.getElementById('savedChips').innerHTML = saved.map((s,i) => `
+    <div class="saved-chip" onclick="loadSaved(${i})">
+      ${s.q}${s.sku?` <span class="saved-sku">${s.sku}</span>`:''}
+      <button class="saved-del" onclick="delSaved(event,${i})">×</button>
+    </div>`).join('');
+}
+
+function loadSaved(i) {
+  document.getElementById('q').value = saved[i].q;
+  document.getElementById('sku').value = saved[i].sku||'';
+  runSearch();
+}
+
+function delSaved(e,i) {
+  e.stopPropagation();
+  saved.splice(i,1);
+  localStorage.setItem('xpm_saved',JSON.stringify(saved));
+  renderSaved();
+}
+
+async function runSearch() {
+  const q = document.getElementById('q').value.trim();
+  const sku = document.getElementById('sku').value.trim();
+  if (!q) { document.getElementById('q').focus(); return; }
+
+  saved = saved.filter(s=>s.q!==q);
+  saved.unshift({q,sku});
+  if (saved.length>12) saved.pop();
+  localStorage.setItem('xpm_saved',JSON.stringify(saved));
+  renderSaved();
+
+  const activeSites = sites.filter(s=>s.enabled);
+  const btn = document.getElementById('btnSearch');
+  btn.disabled=true; btn.textContent='Buscando...';
+
+  const resultsWrap = document.getElementById('resultsWrap');
+  resultsWrap.classList.add('show');
+  document.getElementById('resultsTitle').innerHTML = `"${q}"${sku?` <span style="font-size:13px;color:var(--muted);font-family:'DM Mono',monospace">[${sku}]</span>`:''}`;
+  document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
+
+  // Skeletons
+  document.getElementById('resultsGrid').innerHTML = activeSites.map(s=>`
+    <div class="result-card" id="card_${s.id}">
+      <div class="card-header">
+        <div class="card-site">
+          <img class="card-favicon" src="https://www.google.com/s2/favicons?domain=${new URL(s.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+          <div><div class="card-name">${s.name}</div><div class="card-url">${new URL(s.url).hostname}</div></div>
+        </div>
+        <span class="card-pill pill-loading">buscando...</span>
+      </div>
+      <div class="card-body">
+        <div class="skel" style="height:14px;width:75%;margin-bottom:8px"></div>
+        <div class="skel" style="height:11px;width:45%"></div>
+      </div>
+    </div>`).join('');
+
+  await Promise.all(activeSites.map(site => searchSite(site, q, sku)));
+  btn.disabled=false; btn.textContent='🔍 Buscar precios';
+}
+
+async function searchSite(site, q, sku) {
+  const cardEl = document.getElementById('card_'+site.id);
+  try {
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: q, sku, site })
+    });
+    const result = await res.json();
+    renderCard(cardEl, site, result);
+  } catch(e) {
+    renderCard(cardEl, site, { found:false, products:[], error:e.message });
+  }
+}
+
+function renderCard(cardEl, site, result) {
+  const products = result.products || [];
+  const prices = products.map(p=>p.price).filter(p=>p>0);
+  const minP = prices.length ? Math.min(...prices) : 0;
+  const maxP = prices.length ? Math.max(...prices) : 0;
+
+  const pill = result.error
+    ? `<span class="card-pill pill-err">error</span>`
+    : products.length > 0
+      ? site.isML
+        ? `<span class="card-pill pill-ml">${products.length} resultados</span>`
+        : `<span class="card-pill pill-ok">${products.length} encontrados</span>`
+      : `<span class="card-pill pill-none">sin resultados</span>`;
+
+  let body = '';
+  if (result.error) {
+    body = `<p class="no-result-msg">Error al consultar este sitio.</p>`;
+  } else if (!products.length) {
+    body = `<p class="no-result-msg">No se encontraron resultados en ${site.name}.</p>
+            ${result.note?`<p style="font-size:12px;color:var(--muted);margin-top:4px">${result.note}</p>`:''}`;
+  } else {
+    const items = products.map((p,i) => {
+      let pc = '';
+      if (prices.length>1) {
+        if (p.price <= minP*1.05) pc='cheap';
+        else if (p.price >= maxP*0.95) pc='expensive';
+      }
+      const priceStr = p.price>0
+        ? `$ ${Math.round(p.price).toLocaleString('es-AR')}${p.currency==='USD'?' USD':''}`
+        : 'Ver precio';
+      const sub = [p.seller,p.condition].filter(Boolean).join(' · ');
+      return `<div class="product-item">
+        <div class="p-rank">${i+1}</div>
+        <div class="p-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
+        <div class="p-price ${pc}">${priceStr}</div>
+        ${p.url?`<a href="${p.url}" target="_blank" class="p-link">↗</a>`:'<span></span>'}
+      </div>`;
+    }).join('');
+    body = `<div class="product-list">${items}</div>`;
+    if (prices.length) {
+      body += `<div class="card-summary">
+        <div class="cs-stat"><div class="v green">$ ${Math.round(minP).toLocaleString('es-AR')}</div><div class="l">Más bajo</div></div>
+        <div class="cs-stat"><div class="v red">$ ${Math.round(maxP).toLocaleString('es-AR')}</div><div class="l">Más alto</div></div>
+        ${prices.length>1?`<div class="cs-stat"><div class="v yellow">$ ${Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('es-AR')}</div><div class="l">Promedio</div></div>`:''}
+      </div>`;
+    }
+  }
+
+  cardEl.innerHTML = `
+    <div class="card-header">
+      <div class="card-site">
+        <img class="card-favicon" src="https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+        <div><div class="card-name">${site.name}</div><div class="card-url">${new URL(site.url).hostname}</div></div>
+      </div>
+      ${pill}
+    </div>
+    <div class="card-body">${body}</div>`;
+}
+
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+renderSites();
+renderSaved();
+</script>
+</body>
+</html>
