@@ -17,7 +17,7 @@ function httpsGet(url) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.setTimeout(15000, () => { req.destroy(); reject(new Error('Timeout')); });
     req.end();
   });
 }
@@ -26,12 +26,8 @@ async function searchML(query) {
   const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(query)}&limit=6`;
   console.log('ML URL:', url);
   const data = await httpsGet(url);
-  console.log('ML raw response keys:', Object.keys(data));
-  console.log('ML results count:', data.results?.length);
-  if (!data.results || data.results.length === 0) {
-    console.log('ML error or empty:', JSON.stringify(data).slice(0, 300));
-    return { found: false, products: [] };
-  }
+  console.log('ML results:', data.results?.length, '| error:', data.error);
+  if (!data.results || data.results.length === 0) return { found: false, products: [] };
   const products = data.results.slice(0, 6).map(p => ({
     title: p.title,
     price: Math.round(p.price),
@@ -40,35 +36,40 @@ async function searchML(query) {
     seller: p.seller?.nickname || '',
     condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
   }));
-  console.log('ML products:', products.length, products[0]?.title, products[0]?.price);
-  return { found: products.length > 0, products };
+  return { found: true, products };
 }
 
-async function searchGoogle(query, site, googleKey, cseId) {
+async function searchSerpApi(query, site, serpKey) {
   const hostname = new URL(site.url).hostname;
   const siteQuery = `site:${hostname} ${query}`;
-  const url = `https://www.googleapis.com/customsearch/v1?key=${googleKey}&cx=${cseId}&q=${encodeURIComponent(siteQuery)}&num=6`;
-  console.log('Google query:', siteQuery);
+  const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(siteQuery)}&api_key=${serpKey}&num=6&gl=ar&hl=es`;
+  console.log('SerpApi query:', siteQuery);
   const data = await httpsGet(url);
-  console.log('Google response - items:', data.items?.length, '| error:', data.error?.message);
-  if (!data.items || data.items.length === 0) {
-    return { found: false, products: [] };
-  }
-  const products = data.items.map(item => {
-    const text = (item.title + ' ' + (item.snippet || '')).replace(/\./g, '').replace(/,/g, '.');
-    const priceMatch = text.match(/\$\s*([\d]{4,})/);
-    const price = priceMatch ? parseInt(priceMatch[1]) : 0;
+  console.log('SerpApi results:', data.organic_results?.length, '| error:', data.error);
+  
+  if (data.error) return { found: false, products: [], note: data.error };
+  if (!data.organic_results || data.organic_results.length === 0) return { found: false, products: [] };
+
+  const products = data.organic_results.map(item => {
+    const text = (item.title + ' ' + (item.snippet || ''));
+    // Extract Argentine prices - look for $ followed by numbers
+    const priceMatch = text.match(/\$\s*([\d]{3,}(?:[.,][\d]{3})*)/);
+    let price = 0;
+    if (priceMatch) {
+      price = parseInt(priceMatch[1].replace(/[.,]/g, ''));
+    }
     return {
-      title: item.title.replace(/\s*[-|].*$/, '').trim(),
+      title: item.title.replace(/\s*[-|·].*$/, '').trim(),
       price,
       currency: 'ARS',
       url: item.link,
       seller: '',
-      condition: 'Nuevo'
+      condition: 'Nuevo',
+      snippet: item.snippet || ''
     };
-  });
-  console.log('Google products:', products.length, products[0]?.title, products[0]?.price);
-  return { found: products.length > 0, products };
+  }).filter(p => p.title.length > 0);
+
+  return { found: products.length > 0, products: products.slice(0, 6) };
 }
 
 exports.handler = async function(event) {
@@ -81,11 +82,10 @@ exports.handler = async function(event) {
   catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
 
   const { query, sku, site } = parsed;
-  const googleKey = process.env.GOOGLE_API_KEY;
-  const cseId = process.env.GOOGLE_CSE_ID;
+  const serpKey = process.env.SERP_API_KEY;
 
   console.log('Query:', query, '| Site:', site?.name, '| isML:', site?.isML);
-  console.log('Google key present:', !!googleKey, '| CSE ID present:', !!cseId);
+  console.log('SerpApi key present:', !!serpKey);
 
   if (!query || !site) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parametros' }) };
@@ -96,11 +96,10 @@ exports.handler = async function(event) {
     if (site.isML) {
       result = await searchML(query);
     } else {
-      if (!googleKey || !cseId) {
-        console.log('Missing Google credentials');
-        return { statusCode: 500, body: JSON.stringify({ error: 'Google API no configurada' }) };
+      if (!serpKey) {
+        return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
       }
-      result = await searchGoogle(query, site, googleKey, cseId);
+      result = await searchSerpApi(query, site, serpKey);
     }
 
     console.log('Final result - found:', result.found, '| products:', result.products?.length);
