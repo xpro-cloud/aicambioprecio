@@ -1,26 +1,86 @@
 const https = require('https');
 
-function httpsGet(url) {
+function httpsGet(url, asText) {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(url);
     const options = {
       hostname: urlObj.hostname,
       path: urlObj.pathname + urlObj.search,
       method: 'GET',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; XproMonitor/1.0)' }
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,*/*',
+        'Accept-Language': 'es-AR,es;q=0.9'
+      }
     };
     const req = https.request(options, (res) => {
+      // Follow redirects
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        return httpsGet(res.headers.location, asText).then(resolve).catch(reject);
+      }
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
+        if (asText) return resolve(data);
         try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('Invalid JSON: ' + data.slice(0, 300))); }
+        catch(e) { reject(new Error('Invalid JSON: ' + data.slice(0, 200))); }
       });
     });
     req.on('error', reject);
     req.setTimeout(15000, () => { req.destroy(); reject(new Error('Timeout')); });
     req.end();
   });
+}
+
+// Extraer precio y nombre del producto desde ar.xprostore.com
+async function getXproProduct(sku) {
+  const url = `https://ar.xprostore.com/${sku}`;
+  console.log('Fetching Xpro:', url);
+  try {
+    const html = await httpsGet(url, true);
+
+    // Extraer nombre del producto
+    let name = '';
+    const h1Match = html.match(/<h1[^>]*class="[^"]*product[^"]*"[^>]*>([^<]+)<\/h1>/i)
+                 || html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+    if (h1Match) name = h1Match[1].trim();
+
+    // Extraer precio — buscar patrones de precio en el HTML
+    let price = 0;
+    const pricePatterns = [
+      /class="[^"]*price[^"]*"[^>]*>\s*\$\s*([\d.,]+)/i,
+      /"price"[^>]*>\s*\$\s*([\d.,]+)/i,
+      /itemprop="price"[^>]*content="([\d.,]+)"/i,
+      /\$\s*([\d]{1,3}(?:[.,][\d]{3})+)/g,
+    ];
+
+    for (const pattern of pricePatterns) {
+      const match = html.match(pattern);
+      if (match) {
+        const raw = match[1].replace(/[.,]/g, '');
+        const p = parseInt(raw);
+        if (p > 1000 && p < 100000000) {
+          price = p;
+          break;
+        }
+      }
+    }
+
+    // Si no encontró precio con patrones específicos, buscar el primero válido
+    if (!price) {
+      const allPrices = [...html.matchAll(/\$\s*([\d]{1,3}(?:[.,][\d]{3})+)/g)];
+      for (const m of allPrices) {
+        const p = parseInt(m[1].replace(/[.,]/g, ''));
+        if (p > 10000 && p < 100000000) { price = p; break; }
+      }
+    }
+
+    console.log('Xpro product:', name, '| price:', price);
+    return { name, price, url, found: !!(name || price) };
+  } catch(e) {
+    console.log('Xpro fetch error:', e.message);
+    return { name: '', price: 0, url, found: false };
+  }
 }
 
 function extractPrice(text) {
@@ -42,14 +102,14 @@ function isPageTitle(title) {
   if (/\(\d+\)$/.test(title.trim())) return false;
   if (title.split(' ').length < 3) return false;
   const lower = title.toLowerCase();
-  const bad = ['ver todo', 'todos los', 'bienvenidos', 'inicio', 'home page', 'mejores precios siempre', 'distribuidor oficial', 'tienda online'];
+  const bad = ['ver todo', 'todos los', 'bienvenidos', 'inicio', 'home page', 'mejores precios siempre', 'distribuidor oficial'];
   return !bad.some(w => lower.includes(w));
 }
 
 async function serpSearch(searchQuery, serpKey) {
   const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(searchQuery)}&api_key=${serpKey}&num=8&gl=ar&hl=es`;
   console.log('SerpApi:', searchQuery);
-  const data = await httpsGet(url);
+  const data = await httpsGet(url, false);
   console.log('Results:', data.organic_results?.length || 0, '| error:', data.error || 'none');
   if (data.error || !data.organic_results?.length) return [];
   return data.organic_results;
@@ -64,9 +124,7 @@ async function searchML(query, serpKey) {
     .filter(item => isPageTitle(item.title))
     .filter(item => {
       const lower = item.title.toLowerCase();
-      return !lower.startsWith('funda') && !lower.startsWith('mueble') &&
-             !lower.startsWith('soporte') && !lower.startsWith('correa') &&
-             !lower.startsWith('estuche');
+      return !['funda', 'mueble', 'soporte', 'correa', 'estuche'].some(w => lower.startsWith(w));
     })
     .map(item => {
       const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
@@ -111,7 +169,7 @@ async function searchSite(query, site, serpKey) {
   return { found: products.length > 0, products };
 }
 
-// NETLIFY - sintaxis correcta
+// NETLIFY
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -124,8 +182,19 @@ exports.handler = async function(event) {
   const { query, sku, site } = parsed;
   const serpKey = process.env.SERP_API_KEY;
 
+  // Si es una consulta especial para obtener el producto de Xpro
+  if (site && site.id === 'xpro') {
+    if (!sku) return { statusCode: 400, body: JSON.stringify({ error: 'SKU requerido' }) };
+    const product = await getXproProduct(sku);
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    };
+  }
+
   const searchQuery = sku && sku.trim()
-    ? `${sku.trim()} ${query || ''}`.trim()
+    ? `${query || ''}`.trim()
     : (query || '');
 
   console.log('Query:', searchQuery, '| Site:', site?.name);
