@@ -7,20 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a0f;
-  --surface: #13131a;
-  --surface2: #1c1c27;
-  --border: #2a2a3a;
-  --accent: #f5a623;
-  --accent2: #7c6af5;
-  --text: #e8e8f0;
-  --muted: #6b6b80;
-  --success: #3ecf8e;
-  --danger: #f56565;
+  --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c27;
+  --border: #2a2a3a; --accent: #f5a623; --accent2: #7c6af5;
+  --text: #e8e8f0; --muted: #6b6b80; --success: #3ecf8e; --danger: #f56565;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-
 .header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
 .logo { display: flex; align-items: center; gap: 12px; }
 .logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -29,19 +21,15 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .status { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 6px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-
 .main { max-width: 900px; margin: 0 auto; padding: 36px 32px; }
-
 .search-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; }
 .panel-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
 .panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
-
 .search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
 .input-group label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
 input[type=text] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; width: 100%; }
 input[type=text]:focus { border-color: var(--accent2); }
 ::placeholder { color: var(--muted); }
-
 .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; display: block; }
 .sites-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .btn-sm { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
@@ -57,36 +45,27 @@ input[type=text]:focus { border-color: var(--accent2); }
 .add-row .input-group { flex: 1; }
 .add-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; }
 .btn-add { background: var(--accent2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-
 .saved-wrap { margin-top: 18px; display: none; }
 .saved-wrap.show { display: block; }
 .saved-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .saved-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; transition: all .15s; }
 .saved-chip:hover { border-color: var(--accent); color: var(--accent); }
 .saved-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 0 0 4px; }
-
 .btn-search { width: 100%; background: var(--accent); color: #000; border: none; padding: 13px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
 .btn-search:hover { background: #e09520; }
 .btn-search:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-
-/* XPRO BANNER */
 .xpro-banner { background: var(--surface); border: 1px solid var(--accent2); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: none; }
 .xpro-banner.show { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .xpro-product-name { font-size: 15px; font-weight: 500; }
-.xpro-product-url { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.xpro-link { color: var(--accent2); text-decoration: none; font-size: 12px; }
 .xpro-price-box { text-align: right; }
 .xpro-price { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
 .xpro-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.xpro-link { color: var(--accent2); text-decoration: none; font-size: 13px; }
-.xpro-link:hover { text-decoration: underline; }
-
-/* RESULTS */
 .results-wrap { display: none; }
 .results-wrap.show { display: block; }
 .results-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
 .results-query { font-size: 18px; font-weight: 500; }
 .results-time { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
 .results-grid { display: grid; gap: 12px; }
 .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); }
@@ -101,7 +80,8 @@ input[type=text]:focus { border-color: var(--accent2); }
 .pill-none { background: #2a1515; color: var(--danger); }
 .pill-ml { background: #2a2500; color: #ffe600; border: 1px solid #554a00; }
 .card-body { padding: 16px 18px; }
-
+.skel { background: var(--surface2); border-radius: 6px; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 .product-list { display: flex; flex-direction: column; gap: 8px; }
 .product-item { display: grid; grid-template-columns: 22px 1fr auto auto auto; gap: 10px; align-items: center; padding: 10px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
 .p-rank { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; }
@@ -110,13 +90,12 @@ input[type=text]:focus { border-color: var(--accent2); }
 .p-price { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; white-space: nowrap; text-align: right; }
 .p-price.cheap { color: var(--success); }
 .p-price.expensive { color: var(--danger); }
-.p-diff { font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; text-align: right; padding: 2px 6px; border-radius: 4px; }
+.p-diff { font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; padding: 2px 6px; border-radius: 4px; }
 .diff-up { background: #2a1515; color: var(--danger); }
 .diff-down { background: #0d2a1f; color: var(--success); }
 .diff-eq { background: var(--surface); color: var(--muted); }
 .p-link { color: var(--muted); text-decoration: none; font-size: 16px; }
 .p-link:hover { color: var(--accent); }
-
 .card-summary { display: flex; gap: 20px; flex-wrap: wrap; padding: 12px 18px; background: var(--surface2); border-top: 1px solid var(--border); }
 .cs-stat .v { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
 .cs-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -124,10 +103,6 @@ input[type=text]:focus { border-color: var(--accent2); }
 .v.red { color: var(--danger); }
 .v.yellow { color: var(--accent); }
 .no-result-msg { font-size: 13px; color: var(--muted); }
-
-.skel { background: var(--surface2); border-radius: 6px; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
-
 @media(max-width:600px) { .main { padding: 20px 16px; } .search-row { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -147,19 +122,17 @@ input[type=text]:focus { border-color: var(--accent2); }
 <div class="main">
   <div class="search-panel">
     <div class="panel-title">Comparar precio con la competencia</div>
-    <div class="panel-sub">Ingresá el SKU de Xpro y el nombre del producto. La herramienta muestra el precio de Xpro y lo compara con ML y los sitios competidores.</div>
-
+    <div class="panel-sub">Ingresá el SKU de Xpro para ver el precio propio, y el nombre del producto para buscar en la competencia.</div>
     <div class="search-row">
       <div class="input-group">
-        <label>SKU Xpro (obligatorio)</label>
+        <label>SKU Xpro</label>
         <input type="text" id="sku" placeholder="Ej: 250-8210-533" />
       </div>
       <div class="input-group">
         <label>Nombre del producto (para buscar en competencia)</label>
-        <input type="text" id="q" placeholder="Ej: Yamaha PSRE473 · Fender CD-60SCE" />
+        <input type="text" id="q" placeholder="Ej: Gretsch G5232T Electromatic Double Jet" />
       </div>
     </div>
-
     <div class="sites-row">
       <span class="section-label" style="margin:0">Sitios a comparar</span>
       <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
@@ -176,19 +149,16 @@ input[type=text]:focus { border-color: var(--accent2); }
       </div>
       <button class="btn-add" onclick="addSite()">Agregar</button>
     </div>
-
     <div class="saved-wrap" id="savedWrap">
       <span class="section-label">Búsquedas recientes</span>
       <div class="saved-chips" id="savedChips"></div>
     </div>
-
     <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
   </div>
 
-  <!-- PRECIO XPRO -->
   <div class="xpro-banner" id="xproBanner">
     <div>
-      <div class="xpro-product-name" id="xproName">—</div>
+      <div class="xpro-product-name" id="xproName">Cargando...</div>
       <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en Xpro ↗</a>
     </div>
     <div class="xpro-price-box">
@@ -197,7 +167,6 @@ input[type=text]:focus { border-color: var(--accent2); }
     </div>
   </div>
 
-  <!-- RESULTADOS COMPETENCIA -->
   <div class="results-wrap" id="resultsWrap">
     <div class="results-top">
       <div class="results-query" id="resultsTitle"></div>
@@ -242,7 +211,6 @@ function addSite() {
   ['newUrl','newName'].forEach(id => document.getElementById(id).value='');
   document.getElementById('addRow').classList.remove('show');
 }
-
 function renderSaved() {
   const wrap = document.getElementById('savedWrap');
   if (!saved.length) { wrap.classList.remove('show'); return; }
@@ -265,20 +233,38 @@ function delSaved(e,i) {
   renderSaved();
 }
 
-async function callApi(payload) {
-  const res = await fetch('/api/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  return res.json();
+// Extraer precio de página de Xpro desde el navegador (evita restricciones CORS del servidor)
+async function fetchXproPrice(sku) {
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://ar.xprostore.com/' + sku)}`;
+  try {
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const html = data.contents || '';
+
+    // Extraer nombre del producto
+    let name = '';
+    const h1 = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+    if (h1) name = h1[1].replace(/&amp;/g,'&').replace(/&#039;/g,"'").trim();
+
+    // Extraer precio — buscar el primero válido mayor a 10000
+    let price = 0;
+    const allPrices = [...html.matchAll(/\$\s*([\d]{1,3}(?:[.,][\d]{3})+)/g)];
+    for (const m of allPrices) {
+      const p = parseInt(m[1].replace(/[.,]/g, ''));
+      if (p > 10000 && p < 100000000) { price = p; break; }
+    }
+
+    return { name, price, found: !!(name || price) };
+  } catch(e) {
+    console.log('Xpro proxy error:', e.message);
+    return { name: '', price: 0, found: false };
+  }
 }
 
 async function runSearch() {
   const sku = document.getElementById('sku').value.trim();
   const q = document.getElementById('q').value.trim();
-
-  if (!sku) { document.getElementById('sku').focus(); return; }
+  if (!sku && !q) { document.getElementById('sku').focus(); return; }
 
   saved = saved.filter(s => !(s.sku === sku && s.q === q));
   saved.unshift({ sku, q });
@@ -288,24 +274,27 @@ async function runSearch() {
 
   const btn = document.getElementById('btnSearch');
   btn.disabled = true; btn.textContent = 'Buscando...';
-
-  // Reset UI
   xproPrice = 0;
-  const banner = document.getElementById('xproBanner');
-  banner.classList.remove('show');
-  document.getElementById('xproPrice').textContent = 'Cargando...';
-  document.getElementById('xproName').textContent = '...';
 
-  // Fetch Xpro price + competition simultaneously
-  const activeSites = sites.filter(s => s.enabled);
   const searchQuery = q || sku;
+  const activeSites = sites.filter(s => s.enabled);
+
+  // Mostrar banner Xpro
+  const banner = document.getElementById('xproBanner');
+  if (sku) {
+    banner.classList.add('show');
+    document.getElementById('xproName').textContent = 'Buscando en Xpro...';
+    document.getElementById('xproPrice').textContent = '...';
+    document.getElementById('xproLink').href = `https://ar.xprostore.com/${sku}`;
+  } else {
+    banner.classList.remove('show');
+  }
 
   document.getElementById('resultsTitle').innerHTML = `"${searchQuery}"`;
   document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
   document.getElementById('resultsWrap').classList.add('show');
-  banner.classList.add('show');
 
-  // Show skeletons
+  // Skeletons
   document.getElementById('resultsGrid').innerHTML = activeSites.map(s => `
     <div class="result-card" id="card_${s.id}">
       <div class="card-header">
@@ -321,37 +310,40 @@ async function runSearch() {
       </div>
     </div>`).join('');
 
-  // Fetch Xpro price
-  const xproFetch = callApi({ query: '', sku, site: { id: 'xpro' } }).then(data => {
-    if (data.found || data.price) {
-      xproPrice = data.price || 0;
-      document.getElementById('xproName').textContent = data.name || sku;
-      document.getElementById('xproPrice').textContent = xproPrice > 0
-        ? `$ ${Math.round(xproPrice).toLocaleString('es-AR')}`
-        : 'Sin precio';
-      const link = document.getElementById('xproLink');
-      link.href = `https://ar.xprostore.com/${sku}`;
-    } else {
-      document.getElementById('xproName').textContent = sku;
-      document.getElementById('xproPrice').textContent = 'No encontrado';
-    }
-  }).catch(() => {
-    document.getElementById('xproPrice').textContent = 'Error';
-  });
+  // Buscar precio Xpro y competencia en paralelo
+  const xproPromise = sku ? fetchXproPrice(sku).then(data => {
+    xproPrice = data.price || 0;
+    document.getElementById('xproName').textContent = data.name || sku;
+    document.getElementById('xproPrice').textContent = xproPrice > 0
+      ? `$ ${Math.round(xproPrice).toLocaleString('es-AR')}`
+      : 'Sin precio';
+  }) : Promise.resolve();
 
-  // Fetch competition
-  const competitionFetch = Promise.all(
-    activeSites.map(site => searchSite(site, searchQuery))
+  const competitionPromise = Promise.all(
+    activeSites.map(site => fetchSite(site, searchQuery))
   );
 
-  await Promise.all([xproFetch, competitionFetch]);
+  await Promise.all([xproPromise, competitionPromise]);
+
+  // Re-render cards con comparativa ahora que tenemos xproPrice
+  activeSites.forEach(site => {
+    const cardEl = document.getElementById('card_' + site.id);
+    if (cardEl && cardEl._result) renderCard(cardEl, site, cardEl._result);
+  });
+
   btn.disabled = false; btn.textContent = '🔍 Comparar precios';
 }
 
-async function searchSite(site, query) {
+async function fetchSite(site, query) {
   const cardEl = document.getElementById('card_' + site.id);
   try {
-    const result = await callApi({ query, sku: '', site });
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, sku: '', site })
+    });
+    const result = await res.json();
+    cardEl._result = result;
     renderCard(cardEl, site, result);
   } catch(e) {
     renderCard(cardEl, site, { found: false, products: [], error: e.message });
@@ -367,9 +359,8 @@ function renderCard(cardEl, site, result) {
   const pill = result.error
     ? `<span class="card-pill" style="background:#2a1f0d;color:var(--accent)">error</span>`
     : products.length > 0
-      ? site.isML
-        ? `<span class="card-pill pill-ml">${products.length} resultados</span>`
-        : `<span class="card-pill pill-ok">${products.length} encontrados</span>`
+      ? site.isML ? `<span class="card-pill pill-ml">${products.length} resultados</span>`
+                  : `<span class="card-pill pill-ok">${products.length} encontrados</span>`
       : `<span class="card-pill pill-none">sin resultados</span>`;
 
   let body = '';
@@ -381,14 +372,13 @@ function renderCard(cardEl, site, result) {
     const items = products.map((p, i) => {
       let pc = '';
       if (prices.length > 1) {
-        if (p.price > 0 && p.price <= minP * 1.05) pc = 'cheap';
-        else if (p.price >= maxP * 0.95) pc = 'expensive';
+        if (p.price > 0 && p.price <= minP*1.05) pc = 'cheap';
+        else if (p.price >= maxP*0.95) pc = 'expensive';
       }
       const priceStr = p.price > 0
         ? `$ ${Math.round(p.price).toLocaleString('es-AR')}`
         : `<span style="color:var(--muted);font-size:12px">Ver precio</span>`;
 
-      // Comparativa vs Xpro
       let diffHtml = '';
       if (p.price > 0 && xproPrice > 0) {
         const diff = Math.round(((xproPrice - p.price) / p.price) * 100);
@@ -404,10 +394,10 @@ function renderCard(cardEl, site, result) {
       const sub = [p.seller, p.condition].filter(Boolean).join(' · ');
       return `<div class="product-item">
         <div class="p-rank">${i+1}</div>
-        <div class="p-info"><h4>${p.title}</h4>${sub ? `<p>${sub}</p>` : ''}</div>
+        <div class="p-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
         <div class="p-price ${pc}">${priceStr}</div>
         ${diffHtml}
-        ${p.url ? `<a href="${p.url}" target="_blank" class="p-link">↗</a>` : '<span></span>'}
+        ${p.url?`<a href="${p.url}" target="_blank" class="p-link">↗</a>`:'<span></span>'}
       </div>`;
     }).join('');
     body = `<div class="product-list">${items}</div>`;
@@ -415,8 +405,8 @@ function renderCard(cardEl, site, result) {
       body += `<div class="card-summary">
         <div class="cs-stat"><div class="v green">$ ${Math.round(minP).toLocaleString('es-AR')}</div><div class="l">Más bajo</div></div>
         <div class="cs-stat"><div class="v red">$ ${Math.round(maxP).toLocaleString('es-AR')}</div><div class="l">Más alto</div></div>
-        ${prices.length > 1 ? `<div class="cs-stat"><div class="v yellow">$ ${Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('es-AR')}</div><div class="l">Promedio</div></div>` : ''}
-        ${xproPrice > 0 && minP > 0 ? `<div class="cs-stat"><div class="v ${xproPrice <= minP*1.05 ? 'green' : 'red'}">${xproPrice <= minP*1.05 ? '✓ Competitivo' : '↑ Más caro'}</div><div class="l">Xpro vs este sitio</div></div>` : ''}
+        ${prices.length>1?`<div class="cs-stat"><div class="v yellow">$ ${Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('es-AR')}</div><div class="l">Promedio</div></div>`:''}
+        ${xproPrice>0&&minP>0?`<div class="cs-stat"><div class="v ${xproPrice<=minP*1.05?'green':'red'}">${xproPrice<=minP*1.05?'✓ Competitivo':'↑ Más caro'}</div><div class="l">Xpro vs este sitio</div></div>`:''}
       </div>`;
     }
   }
