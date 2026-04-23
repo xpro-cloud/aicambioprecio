@@ -473,7 +473,16 @@ async function runSearch(){
   const priceInput=document.getElementById('xproPriceInput').value.trim();
   currentBrand=brand;
 
-  if(!brand&&!q){ alert('Ingresá al menos la Marca y el Modelo'); document.getElementById('brand').focus(); return; }
+  if(!brand) {
+    alert('La Marca es obligatoria');
+    document.getElementById('brand').focus();
+    return;
+  }
+  if(!q) {
+    alert('El Modelo es obligatorio');
+    document.getElementById('q').focus();
+    return;
+  }
 
   xproPrice=priceInput?parseInt(priceInput.replace(/[.,]/g,'')):0;
   allCheaper=[]; allPrices=[];
