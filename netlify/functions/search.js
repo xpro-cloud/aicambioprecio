@@ -43,17 +43,21 @@ function httpGet(url, maxBytes, asJson) {
 
 function parseArgentinePrice(str) {
   const clean = str.trim();
-  // Formato argentino: punto=miles, coma=decimal
-  // "813.353,53" -> 813353
-  // "1.658.573,50" -> 1658573
+  // Formato argentino: punto=miles, coma=centavos
+  // "813.353,53"  -> tomar "813.353" -> 813353
+  // "1.658.573,50" -> tomar "1.658.573" -> 1658573
   // "1.658.573" -> 1658573
   if (clean.includes(',')) {
-    const [intPart] = clean.split(',');
-    return parseInt(intPart.replace(/\./g, ''));
+    const [intPart, decPart] = clean.split(',');
+    // Solo ignorar la parte decimal si son 1-2 dígitos (centavos)
+    if (decPart && decPart.length <= 2) {
+      return parseInt(intPart.replace(/\./g, ''));
+    }
+    // Si hay más dígitos después de la coma, tratar todo como entero
+    return parseInt(clean.replace(/[.,]/g, ''));
   }
   // Sin coma — los puntos son separadores de miles
-  const val = parseInt(clean.replace(/\./g, ''));
-  return val;
+  return parseInt(clean.replace(/\./g, ''));
 }
 
 function isReasonablePrice(price, referencePrice) {
