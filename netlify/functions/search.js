@@ -143,14 +143,50 @@ function extractPriceFromText(text) {
   return prices.length > 0 ? Math.min(...prices) : 0;
 }
 
+// Verificar si un item de ML está activo via API
+async function checkMLItemStatus(link) {
+  try {
+    // Extraer ID del item de la URL (MLA-845488583 o MLA845488583)
+    const match = link.match(/MLA-?(\d+)/i);
+    if (!match) return { active: true, price: 0 }; // no podemos verificar, asumir activo
+    
+    const itemId = 'MLA' + match[1];
+    const apiUrl = `https://api.mercadolibre.com/items/${itemId}`;
+    console.log('Checking ML item:', itemId);
+    
+    const data = await httpsGetJson(apiUrl);
+    
+    if (data.error) {
+      console.log('ML item API error:', data.error, 'for', itemId);
+      return { active: false, price: 0 };
+    }
+    
+    const isActive = data.status === 'active' && data.available_quantity > 0;
+    console.log('ML item', itemId, 'status:', data.status, 'qty:', data.available_quantity, 'active:', isActive);
+    
+    return { 
+      active: isActive, 
+      price: isActive ? Math.round(data.price || 0) : 0,
+      title: data.title || ''
+    };
+  } catch(e) {
+    console.log('ML item check error:', e.message);
+    return { active: true, price: 0 }; // si falla, no filtrar
+  }
+}
+
 async function fetchPriceFromPage(url) {
   try {
-    const html = await httpGet(url, 200000, false);
+    // Timeout corto para no bloquear — si el sitio no responde rápido, saltar
+    const html = await Promise.race([
+      httpGet(url, 150000, false),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout 8s')), 8000))
+    ]);
     const price = extractPriceFromHtml(html);
     console.log('Page price:', price, 'from', url.slice(0, 60));
     return price;
   } catch(e) {
-    console.log('Fetch error:', e.message);
+    console.log('Fetch error:', e.message, 'for', url.slice(0, 60));
     return 0;
   }
 }
