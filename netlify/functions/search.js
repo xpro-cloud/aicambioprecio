@@ -183,14 +183,24 @@ async function searchML(query, serpKey) {
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
     .filter(item => titleContainsModel(item.title, model))
-    .filter(item => item.link && !item.link.includes('/s?'));
+    .filter(item => item.link && !item.link.includes('/s?'))
+    // Solo publicaciones directas de MLA (Argentina) — excluir MLAU (Uruguay), MLAC, listados
+    .filter(item => {
+      const link = item.link || '';
+      if (link.includes('MLAU') || link.includes('listado.mercadolibre')) return false;
+      return true;
+    });
 
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
     const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
                       item.rich_snippet?.bottom?.detected_extensions?.price || 0;
     let price = richPrice > 0 ? Math.round(richPrice)
               : extractPriceFromText((item.title||'') + ' ' + (item.snippet||''));
-    if (!price && item.link) price = await fetchPriceFromPage(item.link);
+    // Para ML siempre hacer fetch para verificar stock y precio real
+    if (item.link) {
+      const fetched = await fetchPriceFromPage(item.link);
+      if (fetched > 0) price = fetched;
+    }
     return {
       title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
       price,
@@ -201,7 +211,8 @@ async function searchML(query, serpKey) {
     };
   }));
 
-  const valid = products.filter(p => p.title.length > 2);
+  // Filtrar productos sin precio — probablemente sin stock o pausados
+  const valid = products.filter(p => p.title.length > 2 && p.price > 0);
   return { found: valid.length > 0, products: valid };
 }
 
