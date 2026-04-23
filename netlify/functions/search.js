@@ -160,7 +160,24 @@ function extractModel(query) {
   return match ? match[1] : null;
 }
 
-function normalizeStr(s) { return s.toLowerCase().replace(/[-\s]/g, ''); }
+function normalizeStr(s) { 
+  return s.toLowerCase()
+    .replace(/[-\s_\.]/g, '') // quitar guiones, espacios, puntos
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quitar acentos
+}
+
+// Verificar si el título contiene TODAS las palabras del modelo
+// Tolerante a guiones y espacios
+function titleMatchesModel(title, modelStr) {
+  if (!modelStr) return true;
+  const titleNorm = normalizeStr(title);
+  // Primero intentar match exacto normalizado
+  if (titleNorm.includes(normalizeStr(modelStr))) return true;
+  // Si no, verificar que cada palabra del modelo esté en el título
+  const modelWords = modelStr.toLowerCase().split(/[\s\-_]+/).filter(w => w.length > 1);
+  const titleLower = title.toLowerCase();
+  return modelWords.every(w => titleLower.includes(w));
+}
 function titleContainsModel(title, model) {
   if (!model) return true;
   return normalizeStr(title).includes(normalizeStr(model));
@@ -187,7 +204,7 @@ async function serpSearch(q, serpKey) {
 }
 
 // ML via API oficial
-async function searchML(query, serpKey, brand) {
+async function searchML(query, serpKey, brand, modelField) {
   const model = extractModel(query);
   const searchTerm = model || query;
   
@@ -205,11 +222,11 @@ async function searchML(query, serpKey, brand) {
 
       // Filtrar por modelo si existe
       if (brand) {
-        const withBrand = results.filter(p => p.title.toLowerCase().includes(brand.toLowerCase()));
+        const withBrand = results.filter(p => normalizeStr(p.title).includes(normalizeStr(brand)));
         if (withBrand.length > 0) results = withBrand;
       }
-      if (model) {
-        const withModel = results.filter(p => titleContainsModel(p.title, model));
+      if (modelField) {
+        const withModel = results.filter(p => titleMatchesModel(p.title, modelField));
         if (withModel.length > 0) results = withModel;
       }
 
@@ -245,8 +262,8 @@ async function searchML(query, serpKey, brand) {
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
-    .filter(item => !brand || item.title.toLowerCase().includes(brand.toLowerCase()))
-    .filter(item => titleContainsModel(item.title, model));
+    .filter(item => !brand || normalizeStr(item.title).includes(normalizeStr(brand)))
+    .filter(item => !modelField || titleMatchesModel(item.title, modelField));
 
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
     const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
@@ -268,7 +285,7 @@ async function searchML(query, serpKey, brand) {
   return { found: valid.length > 0, products: valid };
 }
 
-async function searchSite(query, site, serpKey, brand) {
+async function searchSite(query, site, serpKey, brand, modelField) {
   const hostname = new URL(site.url).hostname;
   const model = extractModel(query);
 
@@ -287,19 +304,19 @@ async function searchSite(query, site, serpKey, brand) {
 
   if (!items.length) return { found: false, products: [] };
 
-  const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => {
       const lower = item.title.toLowerCase();
-      // Si hay marca, SIEMPRE debe estar en el título
-      if (brand && !lower.includes(brand.toLowerCase())) return false;
-      if (model) {
-        return titleContainsModel(item.title, model);
-      }
-      // Sin modelo: exigir al menos 2 palabras del query en el título
-      const matches = queryWords.filter(w => lower.includes(w)).length;
-      return matches >= Math.min(2, queryWords.length);
+      const titleNorm = normalizeStr(item.title);
+      
+      // MARCA: siempre obligatoria si se ingresó
+      if (brand && !titleNorm.includes(normalizeStr(brand))) return false;
+      
+      // MODELO: obligatorio, tolerante a errores de tipeo/guiones/espacios
+      if (modelField && !titleMatchesModel(item.title, modelField)) return false;
+      
+      return true;
     });
 
   if (!filtered.length) return { found: false, products: [] };
@@ -349,7 +366,7 @@ exports.handler = async function(event) {
   try { parsed = JSON.parse(event.body || '{}'); }
   catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
 
-  const { query, site, xproPrice, brand } = parsed;
+  const { query, site, xproPrice, brand, model: modelField } = parsed;
   const serpKey = process.env.SERP_API_KEY;
   const model = extractModel(query || '');
   console.log('Query:', query, '| Model:', model, '| Site:', site?.name);
@@ -359,8 +376,8 @@ exports.handler = async function(event) {
 
   try {
     let result = site.isML
-      ? await searchML(query, serpKey, brand)
-      : await searchSite(query, site, serpKey, brand);
+      ? await searchML(query, serpKey, brand, modelField)
+      : await searchSite(query, site, serpKey, brand, modelField);
     
     // Sanitizar precios irreales usando el precio de Xpro como referencia
     if (result.products && xproPrice) {
