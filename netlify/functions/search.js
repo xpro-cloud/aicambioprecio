@@ -43,15 +43,27 @@ function httpGet(url, maxBytes, asJson) {
 
 function parseArgentinePrice(str) {
   const clean = str.trim();
+  // Con coma decimal: "1.658.573,50" -> 1658573
   if (clean.includes(',')) {
     const [intPart] = clean.split(',');
     return parseInt(intPart.replace(/\./g, ''));
   }
+  // Sin coma: "1.658.573" -> 1658573
   return parseInt(clean.replace(/\./g, ''));
+}
+
+function isReasonablePrice(price, referencePrice) {
+  if (price <= 0) return false;
+  if (price > 99000000) return false;
+  // Si tenemos precio de referencia (Xpro), filtrar precios absurdamente alejados
+  // No se usa aquí pero se puede usar en el caller
+  return true;
 }
 
 function extractPriceFromHtml(html) {
   const prices = [];
+
+  // 1. Meta tags — más confiable
   const metaPatterns = [
     /itemprop="price"[^>]*content="([\d.,]+)"/i,
     /"price"\s*:\s*"([\d.,]+)"/,
@@ -64,15 +76,30 @@ function extractPriceFromHtml(html) {
       if (val > 5000 && val < 100000000) { prices.push(val); break; }
     }
   }
+
   if (!prices.length) {
-    const clean = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    // Limpiar scripts y estilos
+    let clean = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
+    // Eliminar contextos de cuotas — buscar y borrar patrones tipo "9 x $123.456" o "en 12 cuotas"
+    clean = clean.replace(/\d+\s*[xX×]\s*\$\s*[\d.,]+/g, '');
+    clean = clean.replace(/en\s+\d+\s+cuotas?[^$<]{0,50}/gi, '');
+    clean = clean.replace(/\d+\s*cuotas?\s*(sin|con)[^$<]{0,50}/gi, '');
+
     const arPattern = /\$\s*([\d]{1,3}(?:\.[\d]{3})+(?:,\d{1,2})?)/g;
     for (const m of [...clean.matchAll(arPattern)]) {
       const val = parseArgentinePrice(m[1]);
       if (val > 10000 && val < 100000000) prices.push(val);
     }
   }
-  return prices.length > 0 ? Math.min(...prices) : 0;
+
+  if (!prices.length) return 0;
+
+  // Filtrar outliers: si hay múltiples precios, descartar los que son <10% del mayor
+  const maxP = Math.max(...prices);
+  const filtered = prices.filter(p => p >= maxP * 0.1);
+  return filtered.length > 0 ? Math.min(...filtered) : 0;
 }
 
 function extractPriceFromText(text) {
