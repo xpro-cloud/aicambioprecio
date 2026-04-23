@@ -319,8 +319,17 @@ async function searchSite(query, site, serpKey, brand, modelField) {
     .filter(item => isNavPage(item.title))
     .filter(item => {
       const titleNorm = normalizeStr(item.title);
+      // Marca: obligatoria si se ingresó
       if (brand && !titleNorm.includes(normalizeStr(brand))) return false;
+      // Modelo: obligatorio si se ingresó
       if (modelField && !titleMatchesModel(item.title, modelField)) return false;
+      // Si no hay ni marca ni modelo, al menos 2 palabras del query deben estar en el título
+      if (!brand && !modelField) {
+        const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+        const lower = item.title.toLowerCase();
+        const matches = queryWords.filter(w => lower.includes(w)).length;
+        if (matches < Math.min(2, queryWords.length)) return false;
+      }
       return true;
     });
 
