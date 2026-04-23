@@ -338,6 +338,17 @@ async function searchSite(query, site, serpKey, brand, modelField) {
     items = await serpSearch(fallQ, serpKey);
   }
 
+  // Segundo fallback: buscar sin site: pero incluyendo el dominio en el query
+  // Útil para sitios que Google no indexa bien con site:
+  if (!items.length) {
+    const domainQ = model
+      ? `${hostname} ${brandTerm} ${model}`
+      : `${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
+    const domainItems = await serpSearch(domainQ, serpKey);
+    // Filtrar que los resultados sean realmente de ese dominio
+    items = domainItems.filter(item => item.link && item.link.includes(hostname));
+  }
+
   if (!items.length) return { found: false, products: [] };
 
   const filtered = items
