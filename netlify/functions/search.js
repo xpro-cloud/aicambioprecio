@@ -43,20 +43,13 @@ function httpGet(url, maxBytes, asJson) {
 
 function parseArgentinePrice(str) {
   const clean = str.trim();
-  // Formato argentino: punto=miles, coma=centavos
-  // "813.353,53"  -> tomar "813.353" -> 813353
-  // "1.658.573,50" -> tomar "1.658.573" -> 1658573
-  // "1.658.573" -> 1658573
   if (clean.includes(',')) {
     const [intPart, decPart] = clean.split(',');
-    // Solo ignorar la parte decimal si son 1-2 dígitos (centavos)
     if (decPart && decPart.length <= 2) {
       return parseInt(intPart.replace(/\./g, ''));
     }
-    // Si hay más dígitos después de la coma, tratar todo como entero
     return parseInt(clean.replace(/[.,]/g, ''));
   }
-  // Sin coma — los puntos son separadores de miles
   return parseInt(clean.replace(/\./g, ''));
 }
 
@@ -64,8 +57,6 @@ function isReasonablePrice(price, referencePrice) {
   if (!price || price <= 0) return false;
   if (price > 99000000) return false;
   if (!referencePrice) return price > 1000;
-  // Aceptar precios entre 30% y 400% del precio de referencia
-  // Rango amplio para sanitizar, luego postProcessProducts filtra a ±35%
   const min = referencePrice * 0.30;
   const max = referencePrice * 4.00;
   return price >= min && price <= max;
@@ -74,7 +65,6 @@ function isReasonablePrice(price, referencePrice) {
 function sanitizePrice(price, referencePrice) {
   if (!price) return 0;
   if (isReasonablePrice(price, referencePrice)) return price;
-  // Intentar corregir precio corrido: dividir por 10, 100 hasta que sea razonable
   let corrected = price;
   for (let i = 0; i < 3; i++) {
     corrected = Math.round(corrected / 10);
@@ -89,8 +79,6 @@ function sanitizePrice(price, referencePrice) {
 
 function extractPriceFromHtml(html) {
   const prices = [];
-
-  // 1. Meta tags — más confiable
   const metaPatterns = [
     /itemprop="price"[^>]*content="([\d.,]+)"/i,
     /"price"\s*:\s*"([\d.,]+)"/,
@@ -103,29 +91,19 @@ function extractPriceFromHtml(html) {
       if (val > 5000 && val < 100000000) { prices.push(val); break; }
     }
   }
-
   if (!prices.length) {
-    // Limpiar scripts y estilos
     let clean = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
                     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-
-    // Eliminar contextos de cuotas — buscar y borrar patrones tipo "9 x $123.456" o "en 12 cuotas"
     clean = clean.replace(/\d+\s*[xX×]\s*\$\s*[\d.,]+/g, '');
     clean = clean.replace(/en\s+\d+\s+cuotas?[^$<]{0,50}/gi, '');
     clean = clean.replace(/\d+\s*cuotas?\s*(sin|con)[^$<]{0,50}/gi, '');
-
     const arPattern = /\$\s*([\d]{1,3}(?:\.[\d]{3})+(?:,\d{1,2})?)/g;
     for (const m of [...clean.matchAll(arPattern)]) {
       const val = parseArgentinePrice(m[1]);
       if (val > 10000 && val < 100000000) prices.push(val);
     }
   }
-
   if (!prices.length) return 0;
-
-  // Filtrar outliers:
-  // 1. Descartar precios < 1000 (probablemente centavos o cuotas muy pequeñas)
-  // 2. Descartar precios que son < 15% del precio máximo (cuotas individuales)
   const validPrices = prices.filter(p => p >= 1000);
   if (!validPrices.length) return 0;
   const maxP = Math.max(...validPrices);
@@ -143,41 +121,26 @@ function extractPriceFromText(text) {
   return prices.length > 0 ? Math.min(...prices) : 0;
 }
 
-// Verificar si un item de ML está activo via API
 async function checkMLItemStatus(link) {
   try {
-    // Extraer ID del item de la URL (MLA-845488583 o MLA845488583)
     const match = link.match(/MLA-?(\d+)/i);
-    if (!match) return { active: true, price: 0 }; // no podemos verificar, asumir activo
-    
+    if (!match) return { active: true, price: 0 };
     const itemId = 'MLA' + match[1];
     const apiUrl = `https://api.mercadolibre.com/items/${itemId}`;
     console.log('Checking ML item:', itemId);
-    
-    const data = await httpsGetJson(apiUrl);
-    
-    if (data.error) {
-      console.log('ML item API error:', data.error, 'for', itemId);
-      return { active: false, price: 0 };
-    }
-    
+    const data = await httpGet(apiUrl, null, true);
+    if (data.error) { console.log('ML item API error:', data.error); return { active: false, price: 0 }; }
     const isActive = data.status === 'active' && data.available_quantity > 0;
-    console.log('ML item', itemId, 'status:', data.status, 'qty:', data.available_quantity, 'active:', isActive);
-    
-    return { 
-      active: isActive, 
-      price: isActive ? Math.round(data.price || 0) : 0,
-      title: data.title || ''
-    };
+    console.log('ML item', itemId, 'status:', data.status, 'active:', isActive);
+    return { active: isActive, price: isActive ? Math.round(data.price || 0) : 0, title: data.title || '' };
   } catch(e) {
     console.log('ML item check error:', e.message);
-    return { active: true, price: 0 }; // si falla, no filtrar
+    return { active: true, price: 0 };
   }
 }
 
 async function fetchPriceFromPage(url) {
   try {
-    // Timeout corto para no bloquear — si el sitio no responde rápido, saltar
     const html = await Promise.race([
       httpGet(url, 150000, false),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout 8s')), 8000))
@@ -196,33 +159,26 @@ function extractModel(query) {
   return match ? match[1] : null;
 }
 
-function normalizeStr(s) { 
+function normalizeStr(s) {
   return s.toLowerCase()
-    .replace(/[-\s_\.]/g, '') // quitar guiones, espacios, puntos
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quitar acentos
+    .replace(/[-\s_\.]/g, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-// Verificar si el título contiene TODAS las palabras del modelo
-// Tolerante a guiones y espacios
 function titleMatchesModel(title, modelStr) {
   if (!modelStr) return true;
   const titleNorm = normalizeStr(title);
-  // Primero intentar match exacto normalizado
   if (titleNorm.includes(normalizeStr(modelStr))) return true;
-  // Si no, verificar que cada palabra del modelo esté en el título
   const modelWords = modelStr.toLowerCase().split(/[\s\-_]+/).filter(w => w.length > 1);
   const titleLower = title.toLowerCase();
   return modelWords.every(w => titleLower.includes(w));
 }
+
 function titleContainsModel(title, model) {
   if (!model) return true;
   return normalizeStr(title).includes(normalizeStr(model));
 }
-function titleMatchesQuery(title, query, minWords) {
-  const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-  const lower = title.toLowerCase();
-  return words.filter(w => lower.includes(w)).length >= Math.min(minWords, words.length);
-}
+
 function isNavPage(title) {
   if (/\(\d+\)$/.test(title.trim())) return false;
   if (title.split(' ').length < 3) return false;
@@ -239,24 +195,21 @@ async function serpSearch(q, serpKey) {
   return data.organic_results || [];
 }
 
-// ML via API oficial
 async function searchML(query, serpKey, brand, modelField) {
   const model = extractModel(query);
-  const searchTerm = model || query;
-  
+  const searchTerm = brand ? `${brand} ${modelField || model || query}` : (model || query);
+
   console.log('ML API search:', searchTerm);
   try {
     const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(searchTerm)}&limit=10&sort=relevance`;
     const data = await httpGet(url, null, true);
-    
+
     if (data.results && data.results.length > 0) {
       console.log('ML API results:', data.results.length);
-      
       let results = data.results
-        .filter(p => p.available_quantity > 0) // solo con stock
+        .filter(p => p.available_quantity > 0)
         .filter(p => !['funda','mueble','soporte','correa','estuche'].some(w => p.title.toLowerCase().startsWith(w)));
 
-      // Filtrar por modelo si existe
       if (brand) {
         const withBrand = results.filter(p => normalizeStr(p.title).includes(normalizeStr(brand)));
         if (withBrand.length > 0) results = withBrand;
@@ -285,30 +238,43 @@ async function searchML(query, serpKey, brand, modelField) {
     console.log('ML API failed:', e.message);
   }
 
-  // Fallback: SerpApi para ML
+  // Fallback SerpApi — solo URLs de producto directo, nunca listados
   console.log('ML fallback to SerpApi');
-  const brandTerm = brand ? brand : '';
-  const searchQ = model
+  const brandTerm = brand || '';
+  const serpQ = model
     ? `site:mercadolibre.com.ar ${brandTerm} "${model}" -funda -mueble -soporte -correa`
     : `site:mercadolibre.com.ar ${brandTerm} "${query}" -funda -mueble -soporte`;
 
-  const items = await serpSearch(searchQ, serpKey);
+  const items = await serpSearch(serpQ, serpKey);
   if (!items.length) return { found: false, products: [] };
 
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
     .filter(item => !brand || normalizeStr(item.title).includes(normalizeStr(brand)))
-    .filter(item => !modelField || titleMatchesModel(item.title, modelField));
+    .filter(item => !modelField || titleMatchesModel(item.title, modelField))
+    // FILTRO ESTRICTO: solo URLs de producto directo, nunca listados
+    .filter(item => {
+      const link = item.link || '';
+      if (link.includes('listado.mercadolibre')) return false;
+      if (link.includes('/s?')) return false;
+      if (link.includes('_OrderId_')) return false;
+      // Aceptar solo URLs con MLA en el path o articulo.mercadolibre
+      return link.includes('-MLA') || link.includes('/p/MLA') || link.includes('articulo.mercadolibre');
+    });
 
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
-    const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
-                      item.rich_snippet?.bottom?.detected_extensions?.price || 0;
-    let price = richPrice > 0 ? Math.round(richPrice)
-              : extractPriceFromText((item.title||'') + ' ' + (item.snippet||''));
-    if (!price && item.link) price = await fetchPriceFromPage(item.link);
+    const statusCheck = await checkMLItemStatus(item.link || '');
+    if (!statusCheck.active) { console.log('ML item skipped (not active):', item.title); return null; }
+    let price = statusCheck.price > 0 ? statusCheck.price : 0;
+    if (!price) {
+      const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
+                        item.rich_snippet?.bottom?.detected_extensions?.price || 0;
+      price = richPrice > 0 ? Math.round(richPrice)
+            : extractPriceFromText((item.title||'') + ' ' + (item.snippet||''));
+    }
     return {
-      title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
+      title: (statusCheck.title || item.title).replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
       price,
       currency: 'ARS',
       url: item.link,
@@ -317,35 +283,33 @@ async function searchML(query, serpKey, brand, modelField) {
     };
   }));
 
-  const valid = products.filter(p => p.title.length > 2 && p.price > 0);
+  const valid = products.filter(p => p && p.title.length > 2 && p.price > 0);
   return { found: valid.length > 0, products: valid };
 }
 
 async function searchSite(query, site, serpKey, brand, modelField) {
   const hostname = new URL(site.url).hostname;
   const model = extractModel(query);
+  const brandTerm = brand || '';
 
-  const brandTerm = brand ? brand : '';
-  const searchQ = model 
+  const searchQ = model
     ? `site:${hostname} ${brandTerm} "${model}"`
     : `site:${hostname} ${brandTerm} "${query.split(' ').slice(0,4).join(' ')}"`;
   let items = await serpSearch(searchQ, serpKey);
 
   if (!items.length) {
-    const fallQ = model 
+    const fallQ = model
       ? `site:${hostname} ${brandTerm} ${model}`
       : `site:${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
     items = await serpSearch(fallQ, serpKey);
   }
 
-  // Segundo fallback: buscar sin site: pero incluyendo el dominio en el query
-  // Útil para sitios que Google no indexa bien con site:
+  // Segundo fallback sin site: — útil para sitios que Google no indexa bien
   if (!items.length) {
     const domainQ = model
       ? `${hostname} ${brandTerm} ${model}`
       : `${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
     const domainItems = await serpSearch(domainQ, serpKey);
-    // Filtrar que los resultados sean realmente de ese dominio
     items = domainItems.filter(item => item.link && item.link.includes(hostname));
   }
 
@@ -354,15 +318,9 @@ async function searchSite(query, site, serpKey, brand, modelField) {
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => {
-      const lower = item.title.toLowerCase();
       const titleNorm = normalizeStr(item.title);
-      
-      // MARCA: siempre obligatoria si se ingresó
       if (brand && !titleNorm.includes(normalizeStr(brand))) return false;
-      
-      // MODELO: obligatorio, tolerante a errores de tipeo/guiones/espacios
       if (modelField && !titleMatchesModel(item.title, modelField)) return false;
-      
       return true;
     });
 
@@ -383,21 +341,15 @@ async function searchSite(query, site, serpKey, brand, modelField) {
     };
   }));
 
-  const valid = products.filter(p => p.title.length > 2);
-  return { found: valid.length > 0, products: valid };
+  return { found: products.length > 0, products: products.filter(p => p.title.length > 2) };
 }
 
-// Recibe referencePrice para sanitizar precios irreales
 function postProcessProducts(products, referencePrice) {
   return products
-    .map(p => ({
-      ...p,
-      price: sanitizePrice(p.price, referencePrice)
-    }))
+    .map(p => ({ ...p, price: sanitizePrice(p.price, referencePrice) }))
     .filter(p => {
-      if (!p.price) return true; // sin precio lo mostramos igual (Ver precio)
+      if (!p.price) return true;
       if (!referencePrice) return true;
-      // Mostrar productos dentro del rango ±35% del precio Xpro
       const ratio = p.price / referencePrice;
       return ratio >= 0.65 && ratio <= 1.35;
     });
@@ -413,8 +365,7 @@ exports.handler = async function(event) {
 
   const { query, site, xproPrice, brand, model: modelField } = parsed;
   const serpKey = process.env.SERP_API_KEY;
-  const model = extractModel(query || '');
-  console.log('Query:', query, '| Model:', model, '| Site:', site?.name);
+  console.log('Query:', query, '| Brand:', brand, '| Model:', modelField, '| Site:', site?.name);
 
   if (!query || !site) return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parametros' }) };
   if (!serpKey) return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
@@ -423,12 +374,11 @@ exports.handler = async function(event) {
     let result = site.isML
       ? await searchML(query, serpKey, brand, modelField)
       : await searchSite(query, site, serpKey, brand, modelField);
-    
-    // Sanitizar precios irreales usando el precio de Xpro como referencia
+
     if (result.products && xproPrice) {
       result = { ...result, products: postProcessProducts(result.products, xproPrice) };
     }
-    
+
     return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(result) };
   } catch(e) {
     console.error('Error:', e.message);
