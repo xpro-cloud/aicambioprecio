@@ -525,6 +525,11 @@ async function runSearch(){
 
   await Promise.all(activeSites.map(site=>fetchSite(site, searchQuery)));
   btn.disabled=false; btn.textContent='🔍 Comparar precios';
+  // Si no hay precios, ocultar resumen global
+  if(!allPrices.length){
+    document.getElementById('globalSummary').style.display='none';
+    document.getElementById('gsStats').innerHTML='';
+  }
 }
 
 async function fetchSite(site, query, attempt){
