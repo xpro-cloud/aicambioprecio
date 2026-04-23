@@ -61,11 +61,29 @@ function parseArgentinePrice(str) {
 }
 
 function isReasonablePrice(price, referencePrice) {
-  if (price <= 0) return false;
+  if (!price || price <= 0) return false;
   if (price > 99000000) return false;
-  // Si tenemos precio de referencia (Xpro), filtrar precios absurdamente alejados
-  // No se usa aquí pero se puede usar en el caller
-  return true;
+  if (!referencePrice) return price > 1000;
+  // Aceptar precios entre 5% y 500% del precio de referencia
+  const min = referencePrice * 0.05;
+  const max = referencePrice * 5;
+  return price >= min && price <= max;
+}
+
+function sanitizePrice(price, referencePrice) {
+  if (!price) return 0;
+  if (isReasonablePrice(price, referencePrice)) return price;
+  // Intentar corregir precio corrido: dividir por 10, 100 hasta que sea razonable
+  let corrected = price;
+  for (let i = 0; i < 3; i++) {
+    corrected = Math.round(corrected / 10);
+    if (isReasonablePrice(corrected, referencePrice)) {
+      console.log('Price corrected:', price, '->', corrected);
+      return corrected;
+    }
+  }
+  console.log('Price discarded:', price);
+  return 0;
 }
 
 function extractPriceFromHtml(html) {
@@ -286,6 +304,14 @@ async function searchSite(query, site, serpKey) {
   return { found: valid.length > 0, products: valid };
 }
 
+// Recibe referencePrice para sanitizar precios irreales
+function postProcessProducts(products, referencePrice) {
+  return products.map(p => ({
+    ...p,
+    price: sanitizePrice(p.price, referencePrice)
+  }));
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -294,7 +320,7 @@ exports.handler = async function(event) {
   try { parsed = JSON.parse(event.body || '{}'); }
   catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
 
-  const { query, site } = parsed;
+  const { query, site, xproPrice } = parsed;
   const serpKey = process.env.SERP_API_KEY;
   const model = extractModel(query || '');
   console.log('Query:', query, '| Model:', model, '| Site:', site?.name);
@@ -303,9 +329,15 @@ exports.handler = async function(event) {
   if (!serpKey) return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
 
   try {
-    const result = site.isML
+    let result = site.isML
       ? await searchML(query, serpKey)
       : await searchSite(query, site, serpKey);
+    
+    // Sanitizar precios irreales usando el precio de Xpro como referencia
+    if (result.products && xproPrice) {
+      result = { ...result, products: postProcessProducts(result.products, xproPrice) };
+    }
+    
     return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(result) };
   } catch(e) {
     console.error('Error:', e.message);
