@@ -64,9 +64,10 @@ function isReasonablePrice(price, referencePrice) {
   if (!price || price <= 0) return false;
   if (price > 99000000) return false;
   if (!referencePrice) return price > 1000;
-  // Aceptar precios entre 5% y 500% del precio de referencia
-  const min = referencePrice * 0.05;
-  const max = referencePrice * 5;
+  // Aceptar precios entre 40% y 300% del precio de referencia
+  // Esto evita cuotas (muy bajo) y errores de parsing (muy alto)
+  const min = referencePrice * 0.40;
+  const max = referencePrice * 3.00;
   return price >= min && price <= max;
 }
 
@@ -275,12 +276,18 @@ async function searchSite(query, site, serpKey) {
 
   if (!items.length) return { found: false, products: [] };
 
+  const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => {
-      const hasModel = model ? titleContainsModel(item.title, model) : false;
-      const hasWords = titleMatchesQuery(item.title, query, 2);
-      return hasModel || hasWords;
+      const lower = item.title.toLowerCase();
+      if (model) {
+        // Si hay modelo alfanumérico, debe estar en el título
+        return titleContainsModel(item.title, model);
+      }
+      // Sin modelo: exigir al menos 3 palabras del query en el título
+      const matches = queryWords.filter(w => lower.includes(w)).length;
+      return matches >= Math.min(3, queryWords.length);
     });
 
   if (!filtered.length) return { found: false, products: [] };
@@ -306,10 +313,20 @@ async function searchSite(query, site, serpKey) {
 
 // Recibe referencePrice para sanitizar precios irreales
 function postProcessProducts(products, referencePrice) {
-  return products.map(p => ({
-    ...p,
-    price: sanitizePrice(p.price, referencePrice)
-  }));
+  return products
+    .map(p => ({
+      ...p,
+      price: sanitizePrice(p.price, referencePrice)
+    }))
+    .filter(p => {
+      if (!p.price) return true; // sin precio lo mostramos igual (Ver precio)
+      if (!referencePrice) return true;
+      // Filtrar productos fuera del rango ±20% del precio Xpro
+      // Salvo que sea mas barato (eso siempre se muestra como alerta)
+      const ratio = p.price / referencePrice;
+      // Mostrar si está entre 20% más barato y 120% más caro
+      return ratio >= 0.20 && ratio <= 1.20;
+    });
 }
 
 exports.handler = async function(event) {
