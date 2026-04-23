@@ -1,4 +1,39 @@
 const https = require('https');
+const http = require('http');
+
+function httpGet(url, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const lib = urlObj.protocol === 'https:' ? https : http;
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
+        'Accept-Language': 'es-AR,es;q=0.9',
+      }
+    };
+    const req = lib.request(options, (res) => {
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        const loc = res.headers.location;
+        if (loc) return httpGet(loc.startsWith('http') ? loc : `${urlObj.origin}${loc}`, maxBytes).then(resolve).catch(reject);
+      }
+      let data = '';
+      let bytes = 0;
+      res.on('data', chunk => {
+        bytes += chunk.length;
+        data += chunk;
+        if (maxBytes && bytes > maxBytes) { req.destroy(); resolve(data); }
+      });
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.end();
+  });
+}
 
 function httpsGet(url) {
   return new Promise((resolve, reject) => {
@@ -14,7 +49,7 @@ function httpsGet(url) {
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('Invalid JSON: ' + data.slice(0, 200))); }
+        catch(e) { reject(new Error('Invalid JSON')); }
       });
     });
     req.on('error', reject);
@@ -25,15 +60,13 @@ function httpsGet(url) {
 
 function extractPrice(text) {
   const prices = [];
-  // Formato argentino: $1.951.262,94 o $1.490.000
   const arPattern = /\$\s*([\d]{1,3}(?:\.[\d]{3})+(?:,\d{1,2})?)/g;
   for (const m of [...text.matchAll(arPattern)]) {
     const p = Math.round(parseFloat(m[1].replace(/\./g, '').replace(',', '.')));
     if (p > 5000 && p < 100000000) prices.push(p);
   }
-  // Fallback simple
   if (!prices.length) {
-    for (const m of [...text.matchAll(/\$\s*([\d]{4,})/g)]) {
+    for (const m of [...text.matchAll(/\$\s*([\d]{5,})/g)]) {
       const p = parseInt(m[1]);
       if (p > 5000 && p < 100000000) prices.push(p);
     }
@@ -41,14 +74,39 @@ function extractPrice(text) {
   return prices.length > 0 ? Math.min(...prices) : 0;
 }
 
+// Extraer precio directo del HTML de una página de producto
+async function fetchPriceFromPage(url) {
+  try {
+    console.log('Fetching page for price:', url);
+    const html = await httpGet(url, 150000); // leer solo los primeros 150KB
+
+    // Buscar precio en meta tags (más confiable)
+    const metaPrice = html.match(/itemprop="price"[^>]*content="([\d.,]+)"/i) ||
+                      html.match(/"price"\s*:\s*"?([\d.,]+)"?/);
+    if (metaPrice) {
+      const p = Math.round(parseFloat(metaPrice[1].replace(/\./g, '').replace(',', '.')));
+      if (p > 5000 && p < 100000000) {
+        console.log('Price from meta:', p);
+        return p;
+      }
+    }
+
+    // Buscar en el HTML completo
+    const price = extractPrice(html);
+    console.log('Price from HTML:', price);
+    return price;
+  } catch(e) {
+    console.log('fetchPriceFromPage error:', e.message);
+    return 0;
+  }
+}
+
 function extractModel(query) {
   const match = query.match(/\b([A-Z]{1,5}[\d]{2,}[A-Z\d\-]*|[\d]{2,}[A-Z]{1,5}[\w\-]*)\b/i);
   return match ? match[1] : null;
 }
 
-function normalizeStr(s) {
-  return s.toLowerCase().replace(/[-\s]/g, '');
-}
+function normalizeStr(s) { return s.toLowerCase().replace(/[-\s]/g, ''); }
 
 function titleContainsModel(title, model) {
   if (!model) return true;
@@ -58,8 +116,7 @@ function titleContainsModel(title, model) {
 function titleMatchesQuery(title, query, minWords) {
   const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
   const lower = title.toLowerCase();
-  const matches = words.filter(w => lower.includes(w)).length;
-  return matches >= Math.min(minWords, words.length);
+  return words.filter(w => lower.includes(w)).length >= Math.min(minWords, words.length);
 }
 
 function isNavPage(title) {
@@ -75,10 +132,6 @@ async function serpSearch(q, serpKey) {
   console.log('SerpApi:', q);
   const data = await httpsGet(url);
   console.log('Results:', data.organic_results?.length || 0, data.error || '');
-  if (data.organic_results?.length) {
-    console.log('Titles:', data.organic_results.slice(0,3).map(r => r.title).join(' | '));
-    console.log('Snippets:', data.organic_results.slice(0,3).map(r => (r.snippet||'').slice(0,80)).join(' | '));
-  }
   return data.organic_results || [];
 }
 
@@ -95,8 +148,7 @@ async function searchML(query, serpKey) {
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
     .filter(item => titleContainsModel(item.title, model))
-    // Filtrar URLs de listados generales — solo publicaciones directas de producto
-    .filter(item => item.link && !item.link.includes('/s?') && !item.link.includes('_OrderId_'))
+    .filter(item => item.link && !item.link.includes('/s?'))
     .map(item => {
       const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
                         item.rich_snippet?.bottom?.detected_extensions?.price || 0;
@@ -121,11 +173,9 @@ async function searchSite(query, site, serpKey) {
   const hostname = new URL(site.url).hostname;
   const model = extractModel(query);
 
-  // Buscar con modelo entre comillas
   const searchQ = model ? `site:${hostname} "${model}"` : `site:${hostname} "${query.split(' ').slice(0,4).join(' ')}"`;
   let items = await serpSearch(searchQ, serpKey);
 
-  // Fallback sin comillas
   if (!items.length) {
     const fallQ = model ? `site:${hostname} ${model}` : `site:${hostname} ${query.split(' ').slice(0,3).join(' ')}`;
     items = await serpSearch(fallQ, serpKey);
@@ -133,37 +183,41 @@ async function searchSite(query, site, serpKey) {
 
   if (!items.length) return { found: false, products: [] };
 
-  console.log('Before filter:', items.length, 'items for', site.name);
-
-  const products = items
+  const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => {
-      // Filtro flexible: modelo presente O al menos 2 palabras del query
       const hasModel = model ? titleContainsModel(item.title, model) : false;
       const hasWords = titleMatchesQuery(item.title, query, 2);
-      const passes = hasModel || hasWords;
-      console.log(`  "${item.title}" -> model:${hasModel} words:${hasWords} pass:${passes}`);
-      return passes;
-    })
-    .map(item => {
-      const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
-                        item.rich_snippet?.bottom?.detected_extensions?.price || 0;
-      const price = richPrice > 0 ? Math.round(richPrice)
-                  : extractPrice((item.title||'') + ' ' + (item.snippet||''));
-      console.log(`  Price for "${item.title.slice(0,40)}": ${price} (rich:${richPrice})`);
-      return {
-        title: item.title.replace(/\s*[-|·].*$/, '').trim(),
-        price,
-        currency: 'ARS',
-        url: item.link,
-        condition: 'Nuevo'
-      };
-    })
-    .filter(p => p.title.length > 2)
-    .slice(0, 5);
+      return hasModel || hasWords;
+    });
 
-  console.log('After filter:', products.length, 'products for', site.name);
-  return { found: products.length > 0, products };
+  if (!filtered.length) return { found: false, products: [] };
+
+  // Para cada resultado, intentar obtener el precio de la página directamente
+  const products = await Promise.all(filtered.slice(0, 4).map(async item => {
+    const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
+                      item.rich_snippet?.bottom?.detected_extensions?.price || 0;
+    let price = richPrice > 0 ? Math.round(richPrice)
+              : extractPrice((item.title||'') + ' ' + (item.snippet||''));
+
+    // Si no hay precio en snippet, hacer fetch a la página
+    if (!price && item.link) {
+      price = await fetchPriceFromPage(item.link);
+    }
+
+    return {
+      title: item.title.replace(/\s*[-|·].*$/, '').trim(),
+      price,
+      currency: 'ARS',
+      url: item.link,
+      condition: 'Nuevo'
+    };
+  }));
+
+  return {
+    found: products.length > 0,
+    products: products.filter(p => p.title.length > 2)
+  };
 }
 
 exports.handler = async function(event) {
