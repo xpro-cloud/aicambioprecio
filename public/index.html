@@ -428,7 +428,7 @@ async function fetchSite(site, query){
     const res = await fetch('/api/search', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ query, site, minWords: 3 })
+      body: JSON.stringify({ query, site, xproPrice })
     });
     const result = await res.json();
     // Agregar alertas
