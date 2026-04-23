@@ -15,25 +15,35 @@
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 
 /* HEADER */
-.header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.header{border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
 .logo-text{font-size:15px;font-weight:600}
 .logo-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite;margin-right:5px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px}
+.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-badge{background:var(--danger);color:#fff;font-size:10px;font-family:'DM Mono',monospace;padding:1px 6px;border-radius:10px;margin-left:6px}
+
 /* LAYOUT */
-.main{max-width:860px;margin:0 auto;padding:28px 24px}
+.main{max-width:900px;margin:0 auto;padding:24px 24px}
+.tab-content{display:none}
+.tab-content.active{display:block}
 
-/* SEARCH PANEL */
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:20px}
-.panel-title{font-size:17px;font-weight:500;margin-bottom:4px}
-.panel-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin-bottom:18px}
+.panel-title{font-size:16px;font-weight:500;margin-bottom:4px}
+.panel-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
 
-.fields{display:grid;grid-template-columns:130px 130px 160px 1fr 140px;gap:10px;margin-bottom:18px}
+/* FIELDS */
+.fields{display:grid;grid-template-columns:120px 120px 150px 1fr 140px;gap:8px;margin-bottom:16px}
 .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px}
-input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
+input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
 input:focus{border-color:var(--accent2)}
 ::placeholder{color:var(--muted)}
 
@@ -42,8 +52,8 @@ input:focus{border-color:var(--accent2)}
 .slabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace}
 .btn-sm{background:transparent;border:1px dashed var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
 .btn-sm:hover{border-color:var(--accent2);color:var(--accent2)}
-.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:12px}
 .chip.ml{border-color:#554a00;color:#ffe600}
 .chip input[type=checkbox]{accent-color:var(--accent);width:12px;height:12px;cursor:pointer}
 .chip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;margin-left:2px}
@@ -51,77 +61,77 @@ input:focus{border-color:var(--accent2)}
 .add-row{display:none;gap:8px;margin-top:8px;align-items:flex-end}
 .add-row.show{display:flex}
 .add-row .field{flex:1}
-.btn-add{background:var(--accent2);color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.btn-add{background:var(--accent2);color:#fff;border:none;padding:8px 13px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap}
 
 /* SAVED */
-.saved{margin-top:14px;display:none}
+.saved{margin-top:12px;display:none}
 .saved.show{display:block}
 .saved-chips{display:flex;flex-wrap:wrap;gap:6px}
 .saved-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s}
 .saved-chip:hover{border-color:var(--accent);color:var(--accent)}
 .saved-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 0 0 3px}
+.saved-sku{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 
-/* SEARCH BTN */
-.btn-search{width:100%;background:var(--accent);color:#000;border:none;padding:12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
+/* BUTTONS */
+.btn-search{width:100%;background:var(--accent);color:#000;border:none;padding:11px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
 .btn-search:hover{background:#e09520}
 .btn-search:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn-primary{background:var(--accent2);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-primary:hover{background:#6a5ae0}
+.btn-primary:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-ghost:hover{border-color:var(--accent2);color:var(--accent2)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif}
 
-/* XPRO PRICE BANNER */
-.xpro-bar{background:var(--surface);border:1px solid var(--accent2);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* XPRO BANNER */
+.xpro-bar{background:var(--surface);border:1px solid var(--accent2);border-radius:12px;padding:13px 18px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .xpro-bar.show{display:flex}
-.xpro-info{display:flex;flex-direction:column;gap:3px}
 .xpro-name{font-size:14px;font-weight:500}
 .xpro-sku{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-.xpro-right{display:flex;align-items:center;gap:16px}
-.xpro-price-wrap{text-align:right}
 .xpro-price{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
 .xpro-price-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.xpro-link{color:var(--accent2);text-decoration:none;font-size:12px;white-space:nowrap}
-.xpro-link:hover{text-decoration:underline}
+.xpro-link{color:var(--accent2);text-decoration:none;font-size:12px}
 
 /* ALERT BANNER */
-.alert-bar{background:#2a0a0a;border:1px solid var(--danger);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none}
+.alert-bar{background:#2a0a0a;border:1px solid var(--danger);border-radius:12px;padding:13px 18px;margin-bottom:14px;display:none}
 .alert-bar.show{display:block}
-.alert-bar h3{font-size:14px;color:var(--danger);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.alert-items{display:flex;flex-direction:column;gap:6px}
-.alert-item{display:flex;align-items:center;justify-content:space-between;background:#1a0505;border:1px solid #3a1515;border-radius:8px;padding:8px 12px}
-.alert-item-left h4{font-size:13px;font-weight:400;margin-bottom:2px}
-.alert-item-left p{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-.alert-item-right{text-align:right;flex-shrink:0}
-.alert-price{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--danger)}
-.alert-diff{font-size:11px;color:#ff8888;font-family:'DM Mono',monospace}
-.alert-link{color:var(--danger);text-decoration:none;font-size:16px;margin-left:8px}
+.alert-bar h3{font-size:13px;color:var(--danger);margin-bottom:8px}
+.alert-items{display:flex;flex-direction:column;gap:5px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;background:#1a0505;border:1px solid #3a1515;border-radius:7px;padding:7px 11px}
+.alert-item h4{font-size:12px;font-weight:400;margin-bottom:1px}
+.alert-item p{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.alert-price{font-family:'DM Mono',monospace;font-size:13px;color:var(--danger)}
+.alert-diff{font-size:10px;color:#ff8888;font-family:'DM Mono',monospace}
+.alert-link{color:var(--danger);text-decoration:none;font-size:15px;margin-left:8px}
 
 /* RESULTS */
 .results{display:none}
 .results.show{display:block}
-.results-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
-.results-title{font-size:17px;font-weight:500}
+.results-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.results-title{font-size:16px;font-weight:500}
 .results-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
 .results-grid{display:grid;gap:10px}
 
 /* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.card-site{display:flex;align-items:center;gap:8px}
-.favicon{width:16px;height:16px;border-radius:3px}
-.card-name{font-size:13px;font-weight:500}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.card-site{display:flex;align-items:center;gap:7px}
+.favicon{width:15px;height:15px;border-radius:3px}
+.card-name{font-size:12px;font-weight:500}
 .card-url{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
-.pill{font-size:10px;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace}
+.pill{font-size:10px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace}
 .pill-loading{background:var(--surface);color:var(--muted);border:1px solid var(--border);animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
 .pill-ok{background:#0d2a1f;color:var(--success)}
 .pill-none{background:#1a1015;color:var(--muted)}
 .pill-ml{background:#2a2500;color:#ffe600;border:1px solid #554a00}
 .pill-alert{background:#2a0a0a;color:var(--danger);border:1px solid #3a1515}
-.card-body{padding:14px 16px}
-
-/* PRODUCT LIST */
-.prod-list{display:flex;flex-direction:column;gap:7px}
-.prod-item{display:grid;grid-template-columns:18px 1fr auto auto auto;gap:10px;align-items:center;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.card-body{padding:12px 15px}
+.prod-list{display:flex;flex-direction:column;gap:6px}
+.prod-item{display:grid;grid-template-columns:16px 1fr auto auto auto;gap:9px;align-items:center;padding:8px 11px;background:var(--surface2);border-radius:7px;border:1px solid var(--border)}
 .prod-item.cheaper{border-color:#3a1515;background:#150505}
 .prod-rank{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center}
-.prod-info h4{font-size:12px;font-weight:400;line-height:1.4;margin-bottom:1px}
+.prod-info h4{font-size:12px;font-weight:400;line-height:1.3;margin-bottom:1px}
 .prod-info p{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
 .prod-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;white-space:nowrap;text-align:right}
 .prod-price.cheaper-price{color:var(--danger)}
@@ -131,27 +141,84 @@ input:focus{border-color:var(--accent2)}
 .diff-cheaper{background:#2a0a0a;color:var(--danger)}
 .diff-same{background:var(--surface);color:var(--muted)}
 .diff-pricier{background:#0a2a15;color:var(--success)}
-.prod-link{color:var(--muted);text-decoration:none;font-size:15px}
+.prod-link{color:var(--muted);text-decoration:none;font-size:14px}
 .prod-link:hover{color:var(--accent)}
 .ver-precio{color:var(--muted);font-size:11px}
+.no-results{font-size:12px;color:var(--muted)}
 
-.card-footer{display:flex;gap:18px;flex-wrap:wrap;padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border)}
-.cf-stat .v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
-.cf-stat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.v-green{color:var(--success)}
-.v-red{color:var(--danger)}
-.v-yellow{color:var(--accent)}
+/* GLOBAL SUMMARY */
+.global-summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:14px}
+.gs-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:12px}
+.gs-stats{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.gs-stat .v{font-family:'DM Mono',monospace;font-size:17px;font-weight:500}
+.gs-stat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.v-green{color:var(--success)}.v-red{color:var(--danger)}.v-yellow{color:var(--accent)}
 
-.no-results{font-size:13px;color:var(--muted)}
-.global-summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-top:16px}
-.gs-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:14px}
-.gs-stats{display:flex;gap:24px;flex-wrap:wrap;align-items:center}
-.gs-stat .v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
-.gs-stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+/* SKELETON */
 .skel{background:var(--surface2);border-radius:6px;background-image:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-@media(max-width:600px){.main{padding:16px}.fields{grid-template-columns:1fr 1fr;}.fields .field:nth-child(3){grid-column:1/-1}}
+/* ===== PANEL DE VIGILANCIA ===== */
+.watch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.watch-actions{display:flex;gap:8px;align-items:center}
+.watch-count{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+
+.watch-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.watch-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.watch-item.alert{border-color:var(--danger)}
+.watch-item.ok{border-color:var(--success)}
+.wi-head{display:grid;grid-template-columns:32px 1fr auto auto auto;gap:10px;align-items:center;padding:12px 16px}
+.wi-status{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.wi-status.pending{background:var(--surface2);color:var(--muted)}
+.wi-status.checking{background:var(--surface2);color:var(--accent);animation:pulse 1s infinite}
+.wi-status.ok{background:#0d2a1f;color:var(--success)}
+.wi-status.alert{background:#2a0a0a;color:var(--danger)}
+.wi-status.error{background:var(--surface2);color:var(--muted)}
+.wi-info{}
+.wi-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.wi-meta{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.wi-price{text-align:right}
+.wi-xpro{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent)}
+.wi-xpro-label{font-size:10px;color:var(--muted)}
+.wi-result{text-align:right;min-width:120px}
+.wi-comp-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+.wi-comp-price.cheaper{color:var(--danger)}
+.wi-comp-price.pricier{color:var(--success)}
+.wi-comp-price.same{color:var(--muted)}
+.wi-comp-label{font-size:10px;color:var(--muted)}
+.wi-comp-diff{font-size:10px;font-family:'DM Mono',monospace}
+.wi-actions{display:flex;gap:6px}
+.wi-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px;border-radius:4px;transition:color .15s}
+.wi-btn:hover{color:var(--text)}
+.wi-btn.edit:hover{color:var(--accent2)}
+.wi-btn.del:hover{color:var(--danger)}
+
+/* Edit form inline */
+.wi-edit{display:none;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface2)}
+.wi-edit.show{display:block}
+.wi-edit-grid{display:grid;grid-template-columns:110px 110px 1fr 130px;gap:8px;margin-bottom:10px}
+.wi-edit label{display:block;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.wi-edit-actions{display:flex;gap:8px}
+
+/* Add form */
+.watch-add{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:16px}
+.watch-add-title{font-size:13px;color:var(--muted);margin-bottom:12px}
+.watch-add-grid{display:grid;grid-template-columns:110px 110px 1fr 130px;gap:8px;margin-bottom:10px}
+.watch-add label{display:block;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+
+/* WhatsApp button */
+.btn-wa{background:#25D366;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif}
+.btn-wa:hover{background:#1fb855}
+.btn-wa:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+
+@media(max-width:650px){
+  .main{padding:16px}
+  .fields{grid-template-columns:1fr 1fr}
+  .fields .field:nth-child(3){grid-column:1/-1}
+  .wi-head{grid-template-columns:28px 1fr auto auto}
+  .wi-result{display:none}
+  .watch-add-grid,.wi-edit-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -167,89 +234,114 @@ input:focus{border-color:var(--accent2)}
   <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"><span class="dot"></span>activo</span>
 </div>
 
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('search')">🔍 Búsqueda</div>
+  <div class="tab" id="watchTab" onclick="switchTab('watch')">👁 Vigilancia <span class="tab-badge" id="alertBadge" style="display:none">0</span></div>
+</div>
+
 <div class="main">
-  <div class="panel">
-    <div class="panel-title">Comparar precio con la competencia</div>
-    <div class="panel-sub">Podés buscar por SKU, por nombre del producto, o ambos. Si ingresás el precio de Xpro, la herramienta alerta automáticamente cuando alguien está más barato.</div>
 
-    <div class="fields">
-      <div class="field">
-        <label>SKU Xpro</label>
-        <input type="text" id="sku" placeholder="250-8210-533" />
+  <!-- ===== TAB: BÚSQUEDA ===== -->
+  <div class="tab-content active" id="tab-search">
+    <div class="panel">
+      <div class="panel-title">Comparar precio con la competencia</div>
+      <div class="panel-sub">Ingresá marca y modelo para buscar. El precio Xpro es opcional pero activa la comparativa automática.</div>
+      <div class="fields">
+        <div class="field"><label>SKU Xpro</label><input type="text" id="sku" placeholder="250-8210-533"/></div>
+        <div class="field"><label>Marca <span style="color:var(--danger)">*</span></label><input type="text" id="brand" placeholder="Squier · Yamaha"/></div>
+        <div class="field"><label>Tipo de producto</label><input type="text" id="product" placeholder="Guitarra eléctrica"/></div>
+        <div class="field"><label>Modelo <span style="color:var(--danger)">*</span></label><input type="text" id="q" placeholder="Stratocaster Affinity"/></div>
+        <div class="field"><label>Precio Xpro ($)</label><input type="number" id="xproPriceInput" placeholder="1490000"/></div>
       </div>
-      <div class="field">
-        <label>Marca <span style="color:var(--danger)">*</span></label>
-        <input type="text" id="brand" placeholder="Squier · Yamaha" />
+      <div class="sites-row">
+        <span class="slabel">Sitios a comparar</span>
+        <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
       </div>
-      <div class="field">
-        <label>Tipo de producto</label>
-        <input type="text" id="product" placeholder="Guitarra eléctrica" />
+      <div class="chips" id="chipsGrid"></div>
+      <div class="add-row" id="addRow">
+        <div class="field"><label>URL</label><input type="text" id="newUrl" placeholder="https://sitio.com.ar"/></div>
+        <div class="field"><label>Nombre</label><input type="text" id="newName" placeholder="Nombre"/></div>
+        <button class="btn-add" onclick="addSite()">Agregar</button>
       </div>
-      <div class="field">
-        <label>Modelo <span style="color:var(--danger)">*</span></label>
-        <input type="text" id="q" placeholder="Stratocaster Affinity · PSRE473" />
+      <div class="saved" id="savedWrap">
+        <div class="slabel" style="margin-bottom:7px">Búsquedas recientes</div>
+        <div class="saved-chips" id="savedChips"></div>
       </div>
-      <div class="field">
-        <label>Precio Xpro ($)</label>
-        <input type="number" id="xproPriceInput" placeholder="1490000" />
+      <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
+    </div>
+
+    <div class="xpro-bar" id="xproBar">
+      <div>
+        <div class="xpro-name" id="xproName">—</div>
+        <div class="xpro-sku" id="xproSkuLabel">—</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="text-align:right">
+          <div class="xpro-price-label">Precio Xpro</div>
+          <div class="xpro-price" id="xproPriceDisplay">—</div>
+        </div>
+        <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en tienda ↗</a>
       </div>
     </div>
 
-    <div class="sites-row">
-      <span class="slabel">Sitios a comparar</span>
-      <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
-    </div>
-    <div class="chips" id="chipsGrid"></div>
-    <div class="add-row" id="addRow">
-      <div class="field"><label>URL</label><input type="text" id="newUrl" placeholder="https://sitio.com.ar" /></div>
-      <div class="field"><label>Nombre</label><input type="text" id="newName" placeholder="Nombre" /></div>
-      <button class="btn-add" onclick="addSite()">Agregar</button>
+    <div class="alert-bar" id="alertBar">
+      <h3>⚠️ Competidores más baratos que Xpro</h3>
+      <div class="alert-items" id="alertItems"></div>
     </div>
 
-    <div class="saved" id="savedWrap">
-      <div class="slabel" style="margin-bottom:8px">Búsquedas recientes</div>
-      <div class="saved-chips" id="savedChips"></div>
+    <div class="results" id="resultsWrap">
+      <div class="results-header">
+        <div class="results-title" id="resultsTitle"></div>
+        <div class="results-time" id="resultsTime"></div>
+      </div>
+      <div class="results-grid" id="resultsGrid"></div>
+      <div class="global-summary" id="globalSummary" style="display:none">
+        <div class="gs-title">Resumen de la competencia</div>
+        <div class="gs-stats" id="gsStats"></div>
+      </div>
     </div>
-
-    <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
   </div>
 
-  <!-- XPRO BANNER -->
-  <div class="xpro-bar" id="xproBar">
-    <div class="xpro-info">
-      <div class="xpro-name" id="xproName">—</div>
-      <div class="xpro-sku" id="xproSkuLabel">—</div>
-    </div>
-    <div class="xpro-right">
-      <div class="xpro-price-wrap">
-        <div class="xpro-price-label">Precio Xpro</div>
-        <div class="xpro-price" id="xproPriceDisplay">—</div>
+  <!-- ===== TAB: VIGILANCIA ===== -->
+  <div class="tab-content" id="tab-watch">
+    <div class="watch-header">
+      <div>
+        <div style="font-size:16px;font-weight:500;margin-bottom:3px">Panel de vigilancia</div>
+        <div class="watch-count" id="watchCount">0 / 10 SKUs configurados</div>
       </div>
-      <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en tienda ↗</a>
+      <div class="watch-actions">
+        <button class="btn-wa" id="btnWA" onclick="sendWhatsApp()" disabled>
+          <span>📱</span> Enviar alerta WA
+        </button>
+        <button class="btn-primary" id="btnCheckAll" onclick="checkAll()">▶ Revisar todos</button>
+      </div>
+    </div>
+
+    <div class="watch-list" id="watchList"></div>
+
+    <div class="watch-add" id="watchAdd" style="display:none">
+      <div class="watch-add-title">+ Agregar producto a vigilancia</div>
+      <div class="watch-add-grid">
+        <div><label>SKU Xpro</label><input type="text" id="wa-sku" placeholder="250-8210-533"/></div>
+        <div><label>Marca</label><input type="text" id="wa-brand" placeholder="Squier"/></div>
+        <div><label>Modelo</label><input type="text" id="wa-model" placeholder="Stratocaster Affinity"/></div>
+        <div><label>Precio Xpro ($)</label><input type="number" id="wa-price" placeholder="1490000"/></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="addWatchItem()">Agregar</button>
+        <button class="btn-ghost" onclick="cancelAdd()">Cancelar</button>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;text-align:center" id="watchAddBtn">
+      <button class="btn-ghost" onclick="showAddWatch()" id="btnAddWatch">+ Agregar producto</button>
     </div>
   </div>
 
-  <!-- ALERT BANNER -->
-  <div class="alert-bar" id="alertBar">
-    <h3>⚠️ Competidores más baratos que Xpro</h3>
-    <div class="alert-items" id="alertItems"></div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results" id="resultsWrap">
-    <div class="results-header">
-      <div class="results-title" id="resultsTitle"></div>
-      <div class="results-time" id="resultsTime"></div>
-    </div>
-    <div class="results-grid" id="resultsGrid"></div>
-    <div class="global-summary" id="globalSummary" style="display:none">
-      <div class="gs-title">Resumen de la competencia</div>
-      <div class="gs-stats" id="gsStats"></div>
-    </div>
-  </div>
 </div>
 
 <script>
+// ===== ESTADO GLOBAL =====
 const DEFAULT_SITES = [
   {id:'ml',   name:'Mercado Libre', url:'https://www.mercadolibre.com.ar', enabled:true, isML:true},
   {id:'larp', name:'Larpon',        url:'https://larpon.com.ar',           enabled:true},
@@ -261,13 +353,26 @@ const DEFAULT_SITES = [
 
 let sites = JSON.parse(localStorage.getItem('xpm_sites')||'null') || DEFAULT_SITES;
 let saved = JSON.parse(localStorage.getItem('xpm_saved')||'[]');
+let watchItems = JSON.parse(localStorage.getItem('xpm_watch')||'[]');
 let xproPrice = 0;
 let allCheaper = [];
-let allPrices = []; // todos los precios de la competencia
+let allPrices = [];
 let currentBrand = '';
+let checkingAll = false;
 
+function fmt(n){ return '$ '+Math.round(n).toLocaleString('es-AR'); }
+
+// ===== TABS =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'watch') renderWatchList();
+}
+
+// ===== SITES =====
 function saveSites(){ localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
-
 function renderSites(){
   document.getElementById('chipsGrid').innerHTML = sites.map(s=>`
     <div class="chip ${s.isML?'ml':''}">
@@ -289,18 +394,21 @@ function addSite(){
   document.getElementById('addRow').classList.remove('show');
 }
 
+// ===== SAVED =====
 function renderSaved(){
   const wrap=document.getElementById('savedWrap');
   if(!saved.length){ wrap.classList.remove('show'); return; }
   wrap.classList.add('show');
   document.getElementById('savedChips').innerHTML=saved.map((s,i)=>`
     <div class="saved-chip" onclick="loadSaved(${i})">
-      ${[s.brand,s.q].filter(Boolean).join(' ')}${s.sku?' <span class="saved-sku">['+s.sku+']</span>':''}
+      ${[s.brand,s.q].filter(Boolean).join(' ')}${s.sku?` <span class="saved-sku">[${s.sku}]</span>`:''}
       <button class="saved-del" onclick="delSaved(event,${i})">×</button>
     </div>`).join('');
 }
 function loadSaved(i){
   document.getElementById('sku').value=saved[i].sku||'';
+  document.getElementById('brand').value=saved[i].brand||'';
+  document.getElementById('product').value=saved[i].product||'';
   document.getElementById('q').value=saved[i].q||'';
   document.getElementById('xproPriceInput').value=saved[i].xproPrice||'';
   runSearch();
@@ -312,26 +420,7 @@ function delSaved(e,i){
   renderSaved();
 }
 
-function fmt(n){ return '$ '+Math.round(n).toLocaleString('es-AR'); }
-
-function renderGlobalSummary(){
-  if(!allPrices.length) return;
-  const gs = document.getElementById('globalSummary');
-  const minP = Math.min(...allPrices);
-  const maxP = Math.max(...allPrices);
-  const avg = Math.round(allPrices.reduce((a,b)=>a+b,0)/allPrices.length);
-  const cheaper = xproPrice ? allPrices.filter(p=>p<xproPrice) : [];
-  gs.style.display='block';
-  document.getElementById('gsStats').innerHTML = `
-    <div class="gs-stat"><div class="v v-green">${fmt(minP)}</div><div class="l">Más bajo</div></div>
-    <div class="gs-stat"><div class="v v-red">${fmt(maxP)}</div><div class="l">Más alto</div></div>
-    ${allPrices.length>1?`<div class="gs-stat"><div class="v v-yellow">${fmt(avg)}</div><div class="l">Promedio</div></div>`:''}
-    ${xproPrice?`<div class="gs-stat"><div class="v" style="color:var(--accent)">${fmt(xproPrice)}</div><div class="l">Precio Xpro</div></div>`:''}
-    ${xproPrice&&cheaper.length?`<div class="gs-stat"><div class="v v-red">⚠ ${cheaper.length} sitio${cheaper.length>1?'s':''} más barato${cheaper.length>1?'s':''}</div><div class="l">que Xpro</div></div>`:''}
-    ${xproPrice&&!cheaper.length?`<div class="gs-stat"><div class="v v-green">✓ Competitivo</div><div class="l">Xpro es el más barato</div></div>`:''}
-  `;
-}
-
+// ===== SEARCH =====
 function addCheaperAlert(product, siteName){
   if(!product.price) return;
   allPrices.push(product.price);
@@ -343,78 +432,83 @@ function addCheaperAlert(product, siteName){
 }
 
 function renderAlerts(){
-  const bar = document.getElementById('alertBar');
-  const items = document.getElementById('alertItems');
-  if(!allCheaper.length || !xproPrice){ bar.classList.remove('show'); return; }
-
-  // Ordenar por precio más barato primero, mostrar top 3
-  const sorted = [...allCheaper].sort((a,b)=>a.price-b.price).slice(0,3);
+  const bar=document.getElementById('alertBar');
+  if(!allCheaper.length||!xproPrice){ bar.classList.remove('show'); return; }
+  const sorted=[...allCheaper].sort((a,b)=>a.price-b.price).slice(0,3);
   bar.classList.add('show');
-  items.innerHTML = sorted.map(p=>{
-    const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
+  document.getElementById('alertItems').innerHTML=sorted.map(p=>{
+    const diff=Math.round(((p.price-xproPrice)/xproPrice)*100);
     return `<div class="alert-item">
-      <div class="alert-item-left">
-        <h4>${p.title}</h4>
-        <p>${p.siteName}</p>
-      </div>
-      <div class="alert-item-right" style="display:flex;align-items:center;gap:8px">
-        <div>
-          <div class="alert-price">${fmt(p.price)}</div>
-          <div class="alert-diff">${diff}% más barato</div>
-        </div>
+      <div><h4>${p.title}</h4><p>${p.siteName}</p></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div><div class="alert-price">${fmt(p.price)}</div><div class="alert-diff">${diff}%</div></div>
         ${p.url?`<a href="${p.url}" target="_blank" class="alert-link">↗</a>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
+function renderGlobalSummary(){
+  if(!allPrices.length) return;
+  const gs=document.getElementById('globalSummary');
+  const minP=Math.min(...allPrices), maxP=Math.max(...allPrices);
+  const avg=Math.round(allPrices.reduce((a,b)=>a+b,0)/allPrices.length);
+  const cheaper=xproPrice?allPrices.filter(p=>p<xproPrice):[];
+  gs.style.display='block';
+  document.getElementById('gsStats').innerHTML=`
+    <div class="gs-stat"><div class="v v-green">${fmt(minP)}</div><div class="l">Más bajo</div></div>
+    <div class="gs-stat"><div class="v v-red">${fmt(maxP)}</div><div class="l">Más alto</div></div>
+    ${allPrices.length>1?`<div class="gs-stat"><div class="v v-yellow">${fmt(avg)}</div><div class="l">Promedio</div></div>`:''}
+    ${xproPrice?`<div class="gs-stat"><div class="v" style="color:var(--accent)">${fmt(xproPrice)}</div><div class="l">Precio Xpro</div></div>`:''}
+    ${xproPrice&&cheaper.length?`<div class="gs-stat"><div class="v v-red">⚠ ${cheaper.length} más barato${cheaper.length>1?'s':''}</div><div class="l">que Xpro</div></div>`:''}
+    ${xproPrice&&!cheaper.length&&allPrices.length?`<div class="gs-stat"><div class="v v-green">✓ Competitivo</div><div class="l">Xpro es el más barato</div></div>`:''}
+  `;
+}
+
 async function runSearch(){
-  const sku = document.getElementById('sku').value.trim();
-  const brand = document.getElementById('brand').value.trim();
-  const product = document.getElementById('product').value.trim();
-  const q = document.getElementById('q').value.trim();
-  const priceInput = document.getElementById('xproPriceInput').value.trim();
-  currentBrand = brand;
+  const sku=document.getElementById('sku').value.trim();
+  const brand=document.getElementById('brand').value.trim();
+  const product=document.getElementById('product').value.trim();
+  const q=document.getElementById('q').value.trim();
+  const priceInput=document.getElementById('xproPriceInput').value.trim();
+  currentBrand=brand;
 
-  if(!sku && !q){ document.getElementById('q').focus(); return; }
+  if(!brand&&!q){ alert('Ingresá al menos la Marca y el Modelo'); document.getElementById('brand').focus(); return; }
 
-  // Determinar query de búsqueda en competencia
-  const searchQuery = [brand, product, q].filter(Boolean).join(' ') || sku;
+  xproPrice=priceInput?parseInt(priceInput.replace(/[.,]/g,'')):0;
+  allCheaper=[]; allPrices=[];
 
-  // Precio Xpro
-  xproPrice = priceInput ? parseInt(priceInput.replace(/[.,]/g,'')) : 0;
-  allCheaper = [];
-
-  // Guardar en historial
-  saved = saved.filter(s=>!(s.sku===sku&&s.q===q));
-  saved.unshift({sku, q, xproPrice: priceInput});
+  saved=saved.filter(s=>!(s.sku===sku&&s.brand===brand&&s.q===q));
+  saved.unshift({sku,brand,product,q,xproPrice:priceInput});
   if(saved.length>12) saved.pop();
-  localStorage.setItem('xpm_saved', JSON.stringify(saved));
+  localStorage.setItem('xpm_saved',JSON.stringify(saved));
   renderSaved();
 
-  const btn = document.getElementById('btnSearch');
+  const btn=document.getElementById('btnSearch');
   btn.disabled=true; btn.textContent='Buscando...';
 
-  // Mostrar banner Xpro
-  if(sku || xproPrice){
+  const searchQuery=[brand,product,q].filter(Boolean).join(' ');
+  const activeSites=sites.filter(s=>s.enabled);
+
+  if(sku||xproPrice){
     document.getElementById('xproBar').classList.add('show');
-    document.getElementById('xproName').textContent = q || sku;
-    document.getElementById('xproSkuLabel').textContent = sku ? `SKU: ${sku}` : '';
-    document.getElementById('xproPriceDisplay').textContent = xproPrice ? fmt(xproPrice) : 'Sin precio';
-    document.getElementById('xproLink').href = sku ? `https://ar.xprostore.com/${sku}` : '#';
+    document.getElementById('xproName').textContent=[brand,q].filter(Boolean).join(' ');
+    document.getElementById('xproSkuLabel').textContent=sku?`SKU: ${sku}`:'';
+    document.getElementById('xproPriceDisplay').textContent=xproPrice?fmt(xproPrice):'Sin precio';
+    document.getElementById('xproLink').href=sku?`https://ar.xprostore.com/${sku}`:'#';
+  } else {
+    document.getElementById('xproBar').classList.remove('show');
   }
 
-  // Reset alertas y resultados
+  document.getElementById('globalSummary').style.display='none';
+  document.getElementById('gsStats').innerHTML='';
   document.getElementById('alertBar').classList.remove('show');
   document.getElementById('alertItems').innerHTML='';
-  document.getElementById('resultsTitle').textContent = `"${searchQuery}"`;
-  document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
+  document.getElementById('resultsTitle').textContent=`"${searchQuery}"`;
+  document.getElementById('resultsTime').textContent=new Date().toLocaleTimeString('es-AR');
   document.getElementById('resultsWrap').classList.add('show');
 
-  const activeSites = sites.filter(s=>s.enabled);
-
-  // Skeletons
-  document.getElementById('resultsGrid').innerHTML = activeSites.map(s=>`
+  document.getElementById('resultsGrid').innerHTML=activeSites.map(s=>`
     <div class="card" id="card_${s.id}">
       <div class="card-head">
         <div class="card-site">
@@ -424,77 +518,58 @@ async function runSearch(){
         <span class="pill pill-loading">buscando...</span>
       </div>
       <div class="card-body">
-        <div class="skel" style="height:13px;width:70%;margin-bottom:7px"></div>
-        <div class="skel" style="height:11px;width:40%"></div>
+        <div class="skel" style="height:12px;width:70%;margin-bottom:7px"></div>
+        <div class="skel" style="height:10px;width:40%"></div>
       </div>
     </div>`).join('');
 
-  await Promise.all(activeSites.map(site => fetchSite(site, searchQuery)));
-
+  await Promise.all(activeSites.map(site=>fetchSite(site, searchQuery)));
   btn.disabled=false; btn.textContent='🔍 Comparar precios';
 }
 
-async function fetchSite(site, query){
-  const cardEl = document.getElementById('card_'+site.id);
-  try {
-    const res = await fetch('/api/search', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ query, site, xproPrice, brand: currentBrand, model: document.getElementById('q').value.trim() })
+async function fetchSite(site, query, attempt){
+  attempt=attempt||1;
+  const cardEl=document.getElementById('card_'+site.id);
+  try{
+    const res=await fetch('/api/search',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query,site,xproPrice,brand:currentBrand,model:document.getElementById('q').value.trim()})
     });
-    const result = await res.json();
-    // Agregar alertas
-    (result.products||[]).forEach(p => addCheaperAlert(p, site.name));
-    renderCard(cardEl, site, result);
-  } catch(e) {
-    renderCard(cardEl, site, {found:false, products:[], error:e.message});
+    const result=await res.json();
+    (result.products||[]).forEach(p=>addCheaperAlert(p,site.name));
+    renderCard(cardEl,site,result);
+  }catch(e){
+    if(attempt<2){ setTimeout(()=>fetchSite(site,query,attempt+1),1500); }
+    else{ renderCard(cardEl,site,{found:false,products:[],error:e.message}); }
   }
 }
 
-function renderCard(cardEl, site, result){
-  const products = result.products||[];
-  const prices = products.map(p=>p.price).filter(p=>p>0);
-  const minP = prices.length ? Math.min(...prices) : 0;
-  const maxP = prices.length ? Math.max(...prices) : 0;
-
-  // Determinar pill
-  const hasCheaper = xproPrice && prices.some(p=>p<xproPrice);
-  const pill = result.error
-    ? `<span class="pill" style="background:#2a1f0d;color:var(--warn)">error</span>`
-    : !products.length
-    ? `<span class="pill pill-none">sin resultados</span>`
-    : hasCheaper
-    ? `<span class="pill pill-alert">⚠ más barato</span>`
-    : site.isML
-    ? `<span class="pill pill-ml">${products.length} resultados</span>`
-    : `<span class="pill pill-ok">${products.length} encontrados</span>`;
+function renderCard(cardEl,site,result){
+  const products=result.products||[];
+  const prices=products.map(p=>p.price).filter(p=>p>0);
+  const minP=prices.length?Math.min(...prices):0;
+  const hasCheaper=xproPrice&&prices.some(p=>p<xproPrice);
+  const pill=result.error
+    ?`<span class="pill" style="background:#2a1f0d;color:var(--warn)">error</span>`
+    :!products.length?`<span class="pill pill-none">sin resultados</span>`
+    :hasCheaper?`<span class="pill pill-alert">⚠ más barato</span>`
+    :site.isML?`<span class="pill pill-ml">${products.length} resultados</span>`
+    :`<span class="pill pill-ok">${products.length} encontrados</span>`;
 
   let body='';
-  if(result.error){
-    body=`<p class="no-results">Error al consultar.</p>`;
-  } else if(!products.length){
-    body=`<p class="no-results">Sin resultados en ${site.name}.</p>`;
-  } else {
-    const items = products.map((p,i)=>{
-      let priceClass='', diffHtml='', itemClass='';
-      if(p.price>0 && xproPrice>0){
-        const diff = Math.round(((p.price - xproPrice)/xproPrice)*100);
-        if(diff < -2){
-          // Más barato que Xpro — ROJO
-          priceClass='cheaper-price'; itemClass='cheaper';
-          diffHtml=`<span class="prod-diff diff-cheaper">${diff}%</span>`;
-        } else if(Math.abs(diff)<=2){
-          // Igual — GRIS
-          priceClass='same';
-          diffHtml=`<span class="prod-diff diff-same">≈ igual</span>`;
-        } else {
-          // Más caro que Xpro — VERDE
-          priceClass='pricier';
-          diffHtml=`<span class="prod-diff diff-pricier">+${diff}%</span>`;
-        }
+  if(result.error) body=`<p class="no-results">Error al consultar.</p>`;
+  else if(!products.length) body=`<p class="no-results">Sin resultados en ${site.name}.</p>`;
+  else{
+    const items=products.map((p,i)=>{
+      let priceClass='',diffHtml='',itemClass='';
+      if(p.price>0&&xproPrice>0){
+        const diff=Math.round(((p.price-xproPrice)/xproPrice)*100);
+        if(diff<-2){priceClass='cheaper-price';itemClass='cheaper';diffHtml=`<span class="prod-diff diff-cheaper">${diff}%</span>`;}
+        else if(Math.abs(diff)<=2){priceClass='same';diffHtml=`<span class="prod-diff diff-same">≈ igual</span>`;}
+        else{priceClass='pricier';diffHtml=`<span class="prod-diff diff-pricier">+${diff}%</span>`;}
       }
-      const priceStr = p.price>0 ? fmt(p.price) : '<span class="ver-precio">Ver precio ↗</span>';
-      const sub = [p.seller, p.condition].filter(Boolean).join(' · ');
+      const priceStr=p.price>0?fmt(p.price):`<span class="ver-precio">Ver precio</span>`;
+      const sub=[p.seller,p.condition].filter(Boolean).join(' · ');
       return `<div class="prod-item ${itemClass}">
         <div class="prod-rank">${i+1}</div>
         <div class="prod-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
@@ -504,16 +579,13 @@ function renderCard(cardEl, site, result){
       </div>`;
     }).join('');
     body=`<div class="prod-list">${items}</div>`;
-
   }
-
   cardEl.innerHTML=`
     <div class="card-head">
       <div class="card-site">
         <img class="favicon" src="https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
         <div><div class="card-name">${site.name}</div><div class="card-url">${new URL(site.url).hostname}</div></div>
-      </div>
-      ${pill}
+      </div>${pill}
     </div>
     <div class="card-body">${body}</div>`;
 }
@@ -521,8 +593,225 @@ function renderCard(cardEl, site, result){
 ['sku','brand','product','q','xproPriceInput'].forEach(id=>{
   document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
 });
+
+// ===== PANEL DE VIGILANCIA =====
+function saveWatch(){ localStorage.setItem('xpm_watch',JSON.stringify(watchItems)); }
+
+function renderWatchList(){
+  const list=document.getElementById('watchList');
+  const count=document.getElementById('watchCount');
+  count.textContent=`${watchItems.length} / 10 SKUs configurados`;
+  document.getElementById('btnAddWatch').style.display=watchItems.length>=10?'none':'inline-block';
+
+  if(!watchItems.length){
+    list.innerHTML=`<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">
+      No hay productos en vigilancia.<br>Agregá hasta 10 SKUs para monitorear automáticamente.
+    </div>`;
+    return;
+  }
+
+  list.innerHTML=watchItems.map((item,i)=>{
+    const statusIcon=item.status==='ok'?'✅':item.status==='alert'?'⚠️':item.status==='checking'?'🔄':item.status==='error'?'—':'⏳';
+    const statusClass=item.status||'pending';
+    const compPriceHtml=item.lastPrice>0
+      ?`<div class="wi-comp-price ${item.lastStatus||''}">${fmt(item.lastPrice)}</div>
+         <div class="wi-comp-label">${item.lastSite||'competencia'}</div>
+         ${item.lastDiff?`<div class="wi-comp-diff" style="color:${item.lastDiff<0?'var(--danger)':item.lastDiff>2?'var(--success)':'var(--muted)'}">${item.lastDiff>0?'+':''}${item.lastDiff}%</div>`:''}`
+      :`<div class="wi-comp-price same">—</div><div class="wi-comp-label">sin datos</div>`;
+    return `
+    <div class="watch-item ${item.status==='alert'?'alert':item.status==='ok'?'ok':''}" id="wi_${i}">
+      <div class="wi-head">
+        <div class="wi-status ${statusClass}">${statusIcon}</div>
+        <div class="wi-info">
+          <div class="wi-name">${item.brand} ${item.model}</div>
+          <div class="wi-meta">${item.sku?`SKU: ${item.sku} · `:''}</div>
+        </div>
+        <div class="wi-price">
+          <div class="wi-xpro-label">Precio Xpro</div>
+          <div class="wi-xpro">${item.price?fmt(item.price):'—'}</div>
+        </div>
+        <div class="wi-result">${compPriceHtml}</div>
+        <div class="wi-actions">
+          <button class="wi-btn edit" onclick="toggleEdit(${i})" title="Editar">✏️</button>
+          <button class="wi-btn del" onclick="deleteWatch(${i})" title="Eliminar">🗑</button>
+        </div>
+      </div>
+      <div class="wi-edit" id="wie_${i}">
+        <div class="wi-edit-grid">
+          <div><label>SKU Xpro</label><input type="text" id="wie-sku-${i}" value="${item.sku||''}"/></div>
+          <div><label>Marca</label><input type="text" id="wie-brand-${i}" value="${item.brand||''}"/></div>
+          <div><label>Modelo</label><input type="text" id="wie-model-${i}" value="${item.model||''}"/></div>
+          <div><label>Precio Xpro ($)</label><input type="number" id="wie-price-${i}" value="${item.price||''}"/></div>
+        </div>
+        <div class="wi-edit-actions">
+          <button class="btn-primary" onclick="saveEdit(${i})">Guardar</button>
+          <button class="btn-ghost" onclick="toggleEdit(${i})">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEdit(i){
+  const el=document.getElementById('wie_'+i);
+  el.classList.toggle('show');
+}
+
+function saveEdit(i){
+  watchItems[i]={
+    ...watchItems[i],
+    sku: document.getElementById(`wie-sku-${i}`).value.trim(),
+    brand: document.getElementById(`wie-brand-${i}`).value.trim(),
+    model: document.getElementById(`wie-model-${i}`).value.trim(),
+    price: parseInt(document.getElementById(`wie-price-${i}`).value)||0,
+    status: 'pending', lastPrice: 0, lastSite: '', lastDiff: 0
+  };
+  saveWatch();
+  renderWatchList();
+}
+
+function deleteWatch(i){
+  if(!confirm('¿Eliminar este producto de la vigilancia?')) return;
+  watchItems.splice(i,1);
+  saveWatch();
+  renderWatchList();
+}
+
+function showAddWatch(){
+  document.getElementById('watchAdd').style.display='block';
+  document.getElementById('watchAddBtn').style.display='none';
+  document.getElementById('wa-brand').focus();
+}
+function cancelAdd(){
+  document.getElementById('watchAdd').style.display='none';
+  document.getElementById('watchAddBtn').style.display='block';
+  ['wa-sku','wa-brand','wa-model','wa-price'].forEach(id=>document.getElementById(id).value='');
+}
+
+function addWatchItem(){
+  const brand=document.getElementById('wa-brand').value.trim();
+  const model=document.getElementById('wa-model').value.trim();
+  if(!brand||!model){ alert('Marca y Modelo son obligatorios'); return; }
+  if(watchItems.length>=10){ alert('Máximo 10 productos'); return; }
+  watchItems.push({
+    sku: document.getElementById('wa-sku').value.trim(),
+    brand, model,
+    price: parseInt(document.getElementById('wa-price').value)||0,
+    status:'pending', lastPrice:0, lastSite:'', lastDiff:0,
+    lastChecked: null
+  });
+  saveWatch();
+  cancelAdd();
+  renderWatchList();
+}
+
+// Verificar todos los productos
+async function checkAll(){
+  if(checkingAll) return;
+  checkingAll=true;
+  const btn=document.getElementById('btnCheckAll');
+  btn.disabled=true; btn.textContent='Revisando...';
+
+  // Resetear estados
+  watchItems=watchItems.map(w=>({...w,status:'checking',lastPrice:0,lastSite:'',lastDiff:0}));
+  saveWatch(); renderWatchList();
+
+  // Revisar uno por uno para no saturar SerpApi
+  for(let i=0;i<watchItems.length;i++){
+    await checkWatchItem(i);
+    renderWatchList();
+    if(i<watchItems.length-1) await new Promise(r=>setTimeout(r,1500)); // pausa entre búsquedas
+  }
+
+  checkingAll=false;
+  btn.disabled=false; btn.textContent='▶ Revisar todos';
+
+  // Actualizar badge y botón WA
+  const alerts=watchItems.filter(w=>w.status==='alert').length;
+  const badge=document.getElementById('alertBadge');
+  if(alerts>0){
+    badge.textContent=alerts;
+    badge.style.display='inline';
+    document.getElementById('btnWA').disabled=false;
+  } else {
+    badge.style.display='none';
+    document.getElementById('btnWA').disabled=true;
+  }
+}
+
+async function checkWatchItem(i){
+  const item=watchItems[i];
+  const query=[item.brand,item.model].filter(Boolean).join(' ');
+  const activeSites=sites.filter(s=>s.enabled);
+
+  let bestPrice=0, bestSite='', bestUrl='';
+
+  // Buscar en todos los sitios activos
+  const results=await Promise.all(activeSites.map(async site=>{
+    try{
+      const res=await fetch('/api/search',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({query,site,xproPrice:item.price,brand:item.brand,model:item.model})
+      });
+      const data=await res.json();
+      return {site:site.name, products:data.products||[]};
+    }catch(e){ return {site:site.name,products:[]}; }
+  }));
+
+  // Encontrar el precio más bajo entre todos los sitios
+  for(const r of results){
+    for(const p of r.products){
+      if(p.price>0 && (!bestPrice || p.price<bestPrice)){
+        bestPrice=p.price;
+        bestSite=r.site;
+        bestUrl=p.url||'';
+      }
+    }
+  }
+
+  // Calcular diff y status
+  let status='pending', diff=0;
+  if(bestPrice>0 && item.price>0){
+    diff=Math.round(((bestPrice-item.price)/item.price)*100);
+    status=diff<-2?'alert':diff>2?'ok':'ok';
+  } else if(bestPrice===0){
+    status='error';
+  }
+
+  watchItems[i]={
+    ...item,
+    status,
+    lastPrice:bestPrice,
+    lastSite:bestSite,
+    lastUrl:bestUrl,
+    lastDiff:diff,
+    lastStatus:diff<-2?'cheaper':diff>2?'pricier':'same',
+    lastChecked:new Date().toLocaleTimeString('es-AR')
+  };
+  saveWatch();
+}
+
+// WhatsApp
+function sendWhatsApp(){
+  const alerts=watchItems.filter(w=>w.status==='alert');
+  if(!alerts.length) return;
+  let msg='⚠️ *Alerta de precios - Xpro*\n\n';
+  msg+=`Hay ${alerts.length} producto${alerts.length>1?'s':''} con competidores más baratos:\n\n`;
+  alerts.forEach(w=>{
+    const diff=w.lastDiff;
+    msg+=`• *${w.brand} ${w.model}*\n`;
+    msg+=`  Xpro: ${fmt(w.price)} | ${w.lastSite}: ${fmt(w.lastPrice)} (${diff}%)\n`;
+    if(w.lastUrl) msg+=`  ${w.lastUrl}\n`;
+    msg+='\n';
+  });
+  msg+=`_${new Date().toLocaleString('es-AR')}_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+// ===== INIT =====
 renderSites();
 renderSaved();
+renderWatchList();
 </script>
 </body>
 </html>
