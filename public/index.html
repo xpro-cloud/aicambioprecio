@@ -3,107 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI cambió de precio</title>
+<title>AI CAMBIÓ EL PRECIO! · Xpro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c27;
-  --border: #2a2a3a; --accent: #f5a623; --accent2: #7c6af5;
-  --text: #e8e8f0; --muted: #6b6b80; --success: #3ecf8e; --danger: #f56565;
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c27;--border:#2a2a3a;
+  --accent:#f5a623;--accent2:#7c6af5;--text:#e8e8f0;--muted:#6b6b80;
+  --success:#3ecf8e;--danger:#f56565;--warn:#f5a623;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
-.header { border-bottom: 1px solid var(--border); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.logo-text { font-size: 16px; font-weight: 600; }
-.logo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; }
-.status { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 6px; }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-.main { max-width: 900px; margin: 0 auto; padding: 36px 32px; }
-.search-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; margin-bottom: 28px; }
-.panel-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-.panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
-.search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.input-group label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
-input[type=text] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; width: 100%; }
-input[type=text]:focus { border-color: var(--accent2); }
-::placeholder { color: var(--muted); }
-.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 10px; display: block; }
-.sites-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.btn-sm { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
-.btn-sm:hover { border-color: var(--accent2); color: var(--accent2); }
-.sites-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.site-chip { display: flex; align-items: center; gap: 7px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 13px; }
-.site-chip.ml-chip { border-color: #554a00; color: #ffe600; }
-.site-chip input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; }
-.chip-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0; margin-left: 2px; }
-.chip-del:hover { color: var(--danger); }
-.add-row { display: none; gap: 8px; margin-top: 8px; align-items: flex-end; }
-.add-row.show { display: flex; }
-.add-row .input-group { flex: 1; }
-.add-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; }
-.btn-add { background: var(--accent2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-.saved-wrap { margin-top: 18px; display: none; }
-.saved-wrap.show { display: block; }
-.saved-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-.saved-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; transition: all .15s; }
-.saved-chip:hover { border-color: var(--accent); color: var(--accent); }
-.saved-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 0 0 4px; }
-.btn-search { width: 100%; background: var(--accent); color: #000; border: none; padding: 13px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
-.btn-search:hover { background: #e09520; }
-.btn-search:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-.xpro-banner { background: var(--surface); border: 1px solid var(--accent2); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: none; }
-.xpro-banner.show { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.xpro-product-name { font-size: 15px; font-weight: 500; }
-.xpro-link { color: var(--accent2); text-decoration: none; font-size: 12px; }
-.xpro-price-box { text-align: right; }
-.xpro-price { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
-.xpro-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.results-wrap { display: none; }
-.results-wrap.show { display: block; }
-.results-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
-.results-query { font-size: 18px; font-weight: 500; }
-.results-time { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-.results-grid { display: grid; gap: 12px; }
-.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); }
-.card-site { display: flex; align-items: center; gap: 9px; }
-.card-favicon { width: 18px; height: 18px; border-radius: 3px; }
-.card-name { font-size: 13px; font-weight: 500; }
-.card-url { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-.card-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; }
-.pill-loading { background: var(--surface); color: var(--muted); border: 1px solid var(--border); animation: blink 1.5s infinite; }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:.4} }
-.pill-ok { background: #0d2a1f; color: var(--success); }
-.pill-none { background: #2a1515; color: var(--danger); }
-.pill-ml { background: #2a2500; color: #ffe600; border: 1px solid #554a00; }
-.card-body { padding: 16px 18px; }
-.skel { background: var(--surface2); border-radius: 6px; background-image: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
-.product-list { display: flex; flex-direction: column; gap: 8px; }
-.product-item { display: grid; grid-template-columns: 22px 1fr auto auto auto; gap: 10px; align-items: center; padding: 10px 13px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
-.p-rank { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; }
-.p-info h4 { font-size: 13px; font-weight: 400; line-height: 1.4; margin-bottom: 2px; }
-.p-info p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-.p-price { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; white-space: nowrap; text-align: right; }
-.p-price.cheap { color: var(--success); }
-.p-price.expensive { color: var(--danger); }
-.p-diff { font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; padding: 2px 6px; border-radius: 4px; }
-.diff-up { background: #2a1515; color: var(--danger); }
-.diff-down { background: #0d2a1f; color: var(--success); }
-.diff-eq { background: var(--surface); color: var(--muted); }
-.p-link { color: var(--muted); text-decoration: none; font-size: 16px; }
-.p-link:hover { color: var(--accent); }
-.card-summary { display: flex; gap: 20px; flex-wrap: wrap; padding: 12px 18px; background: var(--surface2); border-top: 1px solid var(--border); }
-.cs-stat .v { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; }
-.cs-stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-.v.green { color: var(--success); }
-.v.red { color: var(--danger); }
-.v.yellow { color: var(--accent); }
-.no-result-msg { font-size: 13px; color: var(--muted); }
-@media(max-width:600px) { .main { padding: 20px 16px; } .search-row { grid-template-columns: 1fr; } }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* HEADER */
+.header{border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text{font-size:15px;font-weight:600}
+.logo-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 2s infinite;margin-right:5px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LAYOUT */
+.main{max-width:860px;margin:0 auto;padding:28px 24px}
+
+/* SEARCH PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+.panel-title{font-size:17px;font-weight:500;margin-bottom:4px}
+.panel-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+
+.fields{display:grid;grid-template-columns:160px 1fr 160px;gap:10px;margin-bottom:18px}
+.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px}
+input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
+input:focus{border-color:var(--accent2)}
+::placeholder{color:var(--muted)}
+
+/* SITES */
+.sites-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.slabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace}
+.btn-sm{background:transparent;border:1px dashed var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-sm:hover{border-color:var(--accent2);color:var(--accent2)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px}
+.chip.ml{border-color:#554a00;color:#ffe600}
+.chip input[type=checkbox]{accent-color:var(--accent);width:12px;height:12px;cursor:pointer}
+.chip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;margin-left:2px}
+.chip-del:hover{color:var(--danger)}
+.add-row{display:none;gap:8px;margin-top:8px;align-items:flex-end}
+.add-row.show{display:flex}
+.add-row .field{flex:1}
+.btn-add{background:var(--accent2);color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* SAVED */
+.saved{margin-top:14px;display:none}
+.saved.show{display:block}
+.saved-chips{display:flex;flex-wrap:wrap;gap:6px}
+.saved-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s}
+.saved-chip:hover{border-color:var(--accent);color:var(--accent)}
+.saved-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 0 0 3px}
+
+/* SEARCH BTN */
+.btn-search{width:100%;background:var(--accent);color:#000;border:none;padding:12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn-search:hover{background:#e09520}
+.btn-search:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+
+/* XPRO PRICE BANNER */
+.xpro-bar{background:var(--surface);border:1px solid var(--accent2);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.xpro-bar.show{display:flex}
+.xpro-info{display:flex;flex-direction:column;gap:3px}
+.xpro-name{font-size:14px;font-weight:500}
+.xpro-sku{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.xpro-right{display:flex;align-items:center;gap:16px}
+.xpro-price-wrap{text-align:right}
+.xpro-price{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
+.xpro-price-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.xpro-link{color:var(--accent2);text-decoration:none;font-size:12px;white-space:nowrap}
+.xpro-link:hover{text-decoration:underline}
+
+/* ALERT BANNER */
+.alert-bar{background:#2a0a0a;border:1px solid var(--danger);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none}
+.alert-bar.show{display:block}
+.alert-bar h3{font-size:14px;color:var(--danger);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.alert-items{display:flex;flex-direction:column;gap:6px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;background:#1a0505;border:1px solid #3a1515;border-radius:8px;padding:8px 12px}
+.alert-item-left h4{font-size:13px;font-weight:400;margin-bottom:2px}
+.alert-item-left p{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.alert-item-right{text-align:right;flex-shrink:0}
+.alert-price{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--danger)}
+.alert-diff{font-size:11px;color:#ff8888;font-family:'DM Mono',monospace}
+.alert-link{color:var(--danger);text-decoration:none;font-size:16px;margin-left:8px}
+
+/* RESULTS */
+.results{display:none}
+.results.show{display:block}
+.results-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.results-title{font-size:17px;font-weight:500}
+.results-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.results-grid{display:grid;gap:10px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.card-site{display:flex;align-items:center;gap:8px}
+.favicon{width:16px;height:16px;border-radius:3px}
+.card-name{font-size:13px;font-weight:500}
+.card-url{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.pill{font-size:10px;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace}
+.pill-loading{background:var(--surface);color:var(--muted);border:1px solid var(--border);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.pill-ok{background:#0d2a1f;color:var(--success)}
+.pill-none{background:#1a1015;color:var(--muted)}
+.pill-ml{background:#2a2500;color:#ffe600;border:1px solid #554a00}
+.pill-alert{background:#2a0a0a;color:var(--danger);border:1px solid #3a1515}
+.card-body{padding:14px 16px}
+
+/* PRODUCT LIST */
+.prod-list{display:flex;flex-direction:column;gap:7px}
+.prod-item{display:grid;grid-template-columns:18px 1fr auto auto auto;gap:10px;align-items:center;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.prod-item.cheaper{border-color:#3a1515;background:#150505}
+.prod-rank{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center}
+.prod-info h4{font-size:12px;font-weight:400;line-height:1.4;margin-bottom:1px}
+.prod-info p{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.prod-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;white-space:nowrap;text-align:right}
+.prod-price.cheaper-price{color:var(--danger)}
+.prod-price.same{color:var(--muted)}
+.prod-price.pricier{color:var(--success)}
+.prod-diff{font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap;padding:2px 5px;border-radius:4px}
+.diff-cheaper{background:#2a0a0a;color:var(--danger)}
+.diff-same{background:var(--surface);color:var(--muted)}
+.diff-pricier{background:#0a2a15;color:var(--success)}
+.prod-link{color:var(--muted);text-decoration:none;font-size:15px}
+.prod-link:hover{color:var(--accent)}
+.ver-precio{color:var(--muted);font-size:11px}
+
+.card-footer{display:flex;gap:18px;flex-wrap:wrap;padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border)}
+.cf-stat .v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
+.cf-stat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.v-green{color:var(--success)}
+.v-red{color:var(--danger)}
+.v-yellow{color:var(--accent)}
+
+.no-results{font-size:13px;color:var(--muted)}
+.skel{background:var(--surface2);border-radius:6px;background-image:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+@media(max-width:600px){.main{padding:16px}.fields{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -113,63 +156,76 @@ input[type=text]:focus { border-color: var(--accent2); }
     <div class="logo-icon">💰</div>
     <div>
       <div class="logo-text">AI cambió de precio</div>
-      <div class="logo-sub">Monitor de precios · Xpro</div>
+      <div class="logo-sub">Monitor · Xpro</div>
     </div>
   </div>
-  <div class="status"><div class="dot"></div>IA activa</div>
+  <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"><span class="dot"></span>activo</span>
 </div>
 
 <div class="main">
-  <div class="search-panel">
+  <div class="panel">
     <div class="panel-title">Comparar precio con la competencia</div>
-    <div class="panel-sub">Ingresá el SKU de Xpro para ver el precio propio, y el nombre del producto para buscar en la competencia.</div>
-    <div class="search-row">
-      <div class="input-group">
+    <div class="panel-sub">Podés buscar por SKU, por nombre del producto, o ambos. Si ingresás el precio de Xpro, la herramienta alerta automáticamente cuando alguien está más barato.</div>
+
+    <div class="fields">
+      <div class="field">
         <label>SKU Xpro</label>
-        <input type="text" id="sku" placeholder="Ej: 250-8210-533" />
+        <input type="text" id="sku" placeholder="250-8210-533" />
       </div>
-      <div class="input-group">
-        <label>Nombre del producto (para buscar en competencia)</label>
-        <input type="text" id="q" placeholder="Ej: Gretsch G5232T Electromatic Double Jet" />
+      <div class="field">
+        <label>Nombre del producto</label>
+        <input type="text" id="q" placeholder="Gretsch G5232T Electromatic Double Jet" />
+      </div>
+      <div class="field">
+        <label>Precio Xpro ($)</label>
+        <input type="number" id="xproPriceInput" placeholder="1490000" />
       </div>
     </div>
+
     <div class="sites-row">
-      <span class="section-label" style="margin:0">Sitios a comparar</span>
+      <span class="slabel">Sitios a comparar</span>
       <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
     </div>
-    <div class="sites-grid" id="sitesGrid"></div>
+    <div class="chips" id="chipsGrid"></div>
     <div class="add-row" id="addRow">
-      <div class="input-group">
-        <label>URL</label>
-        <input type="text" id="newUrl" placeholder="https://sitio.com.ar" />
-      </div>
-      <div class="input-group">
-        <label>Nombre</label>
-        <input type="text" id="newName" placeholder="Nombre" />
-      </div>
+      <div class="field"><label>URL</label><input type="text" id="newUrl" placeholder="https://sitio.com.ar" /></div>
+      <div class="field"><label>Nombre</label><input type="text" id="newName" placeholder="Nombre" /></div>
       <button class="btn-add" onclick="addSite()">Agregar</button>
     </div>
-    <div class="saved-wrap" id="savedWrap">
-      <span class="section-label">Búsquedas recientes</span>
+
+    <div class="saved" id="savedWrap">
+      <div class="slabel" style="margin-bottom:8px">Búsquedas recientes</div>
       <div class="saved-chips" id="savedChips"></div>
     </div>
+
     <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
   </div>
 
-  <div class="xpro-banner" id="xproBanner">
-    <div>
-      <div class="xpro-product-name" id="xproName">Cargando...</div>
-      <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en Xpro ↗</a>
+  <!-- XPRO BANNER -->
+  <div class="xpro-bar" id="xproBar">
+    <div class="xpro-info">
+      <div class="xpro-name" id="xproName">—</div>
+      <div class="xpro-sku" id="xproSkuLabel">—</div>
     </div>
-    <div class="xpro-price-box">
-      <div class="xpro-label">Precio Xpro</div>
-      <div class="xpro-price" id="xproPrice">—</div>
+    <div class="xpro-right">
+      <div class="xpro-price-wrap">
+        <div class="xpro-price-label">Precio Xpro</div>
+        <div class="xpro-price" id="xproPriceDisplay">—</div>
+      </div>
+      <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en tienda ↗</a>
     </div>
   </div>
 
-  <div class="results-wrap" id="resultsWrap">
-    <div class="results-top">
-      <div class="results-query" id="resultsTitle"></div>
+  <!-- ALERT BANNER -->
+  <div class="alert-bar" id="alertBar">
+    <h3>⚠️ Competidores más baratos que Xpro</h3>
+    <div class="alert-items" id="alertItems"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="resultsWrap">
+    <div class="results-header">
+      <div class="results-title" id="resultsTitle"></div>
       <div class="results-time" id="resultsTime"></div>
     </div>
     <div class="results-grid" id="resultsGrid"></div>
@@ -178,243 +234,247 @@ input[type=text]:focus { border-color: var(--accent2); }
 
 <script>
 const DEFAULT_SITES = [
-  { id:'ml',           name:'Mercado Libre',  url:'https://www.mercadolibre.com.ar', enabled:true, isML:true },
-  { id:'larpon',       name:'Larpon',         url:'https://larpon.com.ar',           enabled:true },
-  { id:'todomusica',   name:'Todo Música',    url:'https://todomusica.com.ar',       enabled:true },
-  { id:'mariogomez',   name:'Mario Gomez',    url:'https://mariogomez.com.ar',       enabled:true },
-  { id:'tecnowestune', name:'Tecnowestune',   url:'https://www.tecnowestune.com',    enabled:true },
-  { id:'lafusa',       name:'La Fusa',        url:'https://www.lafusa.com.ar',       enabled:true },
+  {id:'ml',   name:'Mercado Libre', url:'https://www.mercadolibre.com.ar', enabled:true, isML:true},
+  {id:'larp', name:'Larpon',        url:'https://larpon.com.ar',           enabled:true},
+  {id:'todo', name:'Todo Música',   url:'https://todomusica.com.ar',       enabled:true},
+  {id:'mario',name:'Mario Gomez',   url:'https://mariogomez.com.ar',       enabled:true},
+  {id:'tecno',name:'Tecnowestune',  url:'https://www.tecnowestune.com',    enabled:true},
+  {id:'fusa', name:'La Fusa',       url:'https://www.lafusa.com.ar',       enabled:true},
 ];
 
-let sites = JSON.parse(localStorage.getItem('xpm_sites') || 'null') || DEFAULT_SITES;
-let saved = JSON.parse(localStorage.getItem('xpm_saved') || '[]');
+let sites = JSON.parse(localStorage.getItem('xpm_sites')||'null') || DEFAULT_SITES;
+let saved = JSON.parse(localStorage.getItem('xpm_saved')||'[]');
 let xproPrice = 0;
+let allCheaper = []; // todos los resultados más baratos que Xpro
 
-function saveSites() { localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
-function renderSites() {
-  document.getElementById('sitesGrid').innerHTML = sites.map(s => `
-    <div class="site-chip ${s.isML ? 'ml-chip' : ''}">
+function saveSites(){ localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
+
+function renderSites(){
+  document.getElementById('chipsGrid').innerHTML = sites.map(s=>`
+    <div class="chip ${s.isML?'ml':''}">
       <input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSite('${s.id}',this.checked)">
       ${s.name}
-      ${!s.isML ? `<button class="chip-del" onclick="removeSite('${s.id}')">×</button>` : ''}
+      ${!s.isML?`<button class="chip-del" onclick="removeSite('${s.id}')">×</button>`:''}
     </div>`).join('');
 }
-function toggleSite(id, val) { sites = sites.map(s => s.id===id?{...s,enabled:val}:s); saveSites(); }
-function removeSite(id) { sites = sites.filter(s=>s.id!==id); saveSites(); renderSites(); }
-function toggleAdd() { document.getElementById('addRow').classList.toggle('show'); }
-function addSite() {
-  const url = document.getElementById('newUrl').value.trim();
-  const name = document.getElementById('newName').value.trim();
-  if (!url || !name) return;
-  sites.push({ id:'c_'+Date.now(), name, url, enabled:true });
+function toggleSite(id,val){ sites=sites.map(s=>s.id===id?{...s,enabled:val}:s); saveSites(); }
+function removeSite(id){ sites=sites.filter(s=>s.id!==id); saveSites(); renderSites(); }
+function toggleAdd(){ document.getElementById('addRow').classList.toggle('show'); }
+function addSite(){
+  const url=document.getElementById('newUrl').value.trim();
+  const name=document.getElementById('newName').value.trim();
+  if(!url||!name) return;
+  sites.push({id:'c_'+Date.now(),name,url,enabled:true});
   saveSites(); renderSites();
-  ['newUrl','newName'].forEach(id => document.getElementById(id).value='');
+  ['newUrl','newName'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('addRow').classList.remove('show');
 }
-function renderSaved() {
-  const wrap = document.getElementById('savedWrap');
-  if (!saved.length) { wrap.classList.remove('show'); return; }
+
+function renderSaved(){
+  const wrap=document.getElementById('savedWrap');
+  if(!saved.length){ wrap.classList.remove('show'); return; }
   wrap.classList.add('show');
-  document.getElementById('savedChips').innerHTML = saved.map((s,i) => `
+  document.getElementById('savedChips').innerHTML=saved.map((s,i)=>`
     <div class="saved-chip" onclick="loadSaved(${i})">
-      ${s.sku}${s.q ? ` · ${s.q}` : ''}
+      ${[s.sku,s.q].filter(Boolean).join(' · ')}
       <button class="saved-del" onclick="delSaved(event,${i})">×</button>
     </div>`).join('');
 }
-function loadSaved(i) {
-  document.getElementById('sku').value = saved[i].sku || '';
-  document.getElementById('q').value = saved[i].q || '';
+function loadSaved(i){
+  document.getElementById('sku').value=saved[i].sku||'';
+  document.getElementById('q').value=saved[i].q||'';
+  document.getElementById('xproPriceInput').value=saved[i].xproPrice||'';
   runSearch();
 }
-function delSaved(e,i) {
+function delSaved(e,i){
   e.stopPropagation();
   saved.splice(i,1);
   localStorage.setItem('xpm_saved',JSON.stringify(saved));
   renderSaved();
 }
 
-// Extraer precio de página de Xpro desde el navegador (evita restricciones CORS del servidor)
-async function fetchXproPrice(sku) {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://ar.xprostore.com/' + sku)}`;
-  try {
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const html = data.contents || '';
+function fmt(n){ return '$ '+Math.round(n).toLocaleString('es-AR'); }
 
-    // Extraer nombre del producto
-    let name = '';
-    const h1 = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1) name = h1[1].replace(/&amp;/g,'&').replace(/&#039;/g,"'").trim();
-
-    // Extraer precio — buscar el primero válido mayor a 10000
-    let price = 0;
-    const allPrices = [...html.matchAll(/\$\s*([\d]{1,3}(?:[.,][\d]{3})+)/g)];
-    for (const m of allPrices) {
-      const p = parseInt(m[1].replace(/[.,]/g, ''));
-      if (p > 10000 && p < 100000000) { price = p; break; }
-    }
-
-    return { name, price, found: !!(name || price) };
-  } catch(e) {
-    console.log('Xpro proxy error:', e.message);
-    return { name: '', price: 0, found: false };
+function addCheaperAlert(product, siteName){
+  if(!xproPrice || !product.price) return;
+  if(product.price < xproPrice){
+    allCheaper.push({...product, siteName});
+    renderAlerts();
   }
 }
 
-async function runSearch() {
+function renderAlerts(){
+  const bar = document.getElementById('alertBar');
+  const items = document.getElementById('alertItems');
+  if(!allCheaper.length || !xproPrice){ bar.classList.remove('show'); return; }
+
+  // Ordenar por precio más barato primero, mostrar top 3
+  const sorted = [...allCheaper].sort((a,b)=>a.price-b.price).slice(0,3);
+  bar.classList.add('show');
+  items.innerHTML = sorted.map(p=>{
+    const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
+    return `<div class="alert-item">
+      <div class="alert-item-left">
+        <h4>${p.title}</h4>
+        <p>${p.siteName}</p>
+      </div>
+      <div class="alert-item-right" style="display:flex;align-items:center;gap:8px">
+        <div>
+          <div class="alert-price">${fmt(p.price)}</div>
+          <div class="alert-diff">${diff}% más barato</div>
+        </div>
+        ${p.url?`<a href="${p.url}" target="_blank" class="alert-link">↗</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function runSearch(){
   const sku = document.getElementById('sku').value.trim();
   const q = document.getElementById('q').value.trim();
-  if (!sku && !q) { document.getElementById('sku').focus(); return; }
+  const priceInput = document.getElementById('xproPriceInput').value.trim();
 
-  saved = saved.filter(s => !(s.sku === sku && s.q === q));
-  saved.unshift({ sku, q });
-  if (saved.length > 12) saved.pop();
+  if(!sku && !q){ document.getElementById('q').focus(); return; }
+
+  // Determinar query de búsqueda en competencia
+  const searchQuery = q || sku;
+
+  // Precio Xpro
+  xproPrice = priceInput ? parseInt(priceInput.replace(/[.,]/g,'')) : 0;
+  allCheaper = [];
+
+  // Guardar en historial
+  saved = saved.filter(s=>!(s.sku===sku&&s.q===q));
+  saved.unshift({sku, q, xproPrice: priceInput});
+  if(saved.length>12) saved.pop();
   localStorage.setItem('xpm_saved', JSON.stringify(saved));
   renderSaved();
 
   const btn = document.getElementById('btnSearch');
-  btn.disabled = true; btn.textContent = 'Buscando...';
-  xproPrice = 0;
-
-  const searchQuery = q || sku;
-  const activeSites = sites.filter(s => s.enabled);
+  btn.disabled=true; btn.textContent='Buscando...';
 
   // Mostrar banner Xpro
-  const banner = document.getElementById('xproBanner');
-  if (sku) {
-    banner.classList.add('show');
-    document.getElementById('xproName').textContent = 'Buscando en Xpro...';
-    document.getElementById('xproPrice').textContent = '...';
-    document.getElementById('xproLink').href = `https://ar.xprostore.com/${sku}`;
-  } else {
-    banner.classList.remove('show');
+  if(sku || xproPrice){
+    document.getElementById('xproBar').classList.add('show');
+    document.getElementById('xproName').textContent = q || sku;
+    document.getElementById('xproSkuLabel').textContent = sku ? `SKU: ${sku}` : '';
+    document.getElementById('xproPriceDisplay').textContent = xproPrice ? fmt(xproPrice) : 'Sin precio';
+    document.getElementById('xproLink').href = sku ? `https://ar.xprostore.com/${sku}` : '#';
   }
 
-  document.getElementById('resultsTitle').innerHTML = `"${searchQuery}"`;
+  // Reset alertas y resultados
+  document.getElementById('alertBar').classList.remove('show');
+  document.getElementById('alertItems').innerHTML='';
+  document.getElementById('resultsTitle').textContent = `"${searchQuery}"`;
   document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
   document.getElementById('resultsWrap').classList.add('show');
 
+  const activeSites = sites.filter(s=>s.enabled);
+
   // Skeletons
-  document.getElementById('resultsGrid').innerHTML = activeSites.map(s => `
-    <div class="result-card" id="card_${s.id}">
-      <div class="card-header">
+  document.getElementById('resultsGrid').innerHTML = activeSites.map(s=>`
+    <div class="card" id="card_${s.id}">
+      <div class="card-head">
         <div class="card-site">
-          <img class="card-favicon" src="https://www.google.com/s2/favicons?domain=${new URL(s.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+          <img class="favicon" src="https://www.google.com/s2/favicons?domain=${new URL(s.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
           <div><div class="card-name">${s.name}</div><div class="card-url">${new URL(s.url).hostname}</div></div>
         </div>
-        <span class="card-pill pill-loading">buscando...</span>
+        <span class="pill pill-loading">buscando...</span>
       </div>
       <div class="card-body">
-        <div class="skel" style="height:14px;width:75%;margin-bottom:8px"></div>
-        <div class="skel" style="height:11px;width:45%"></div>
+        <div class="skel" style="height:13px;width:70%;margin-bottom:7px"></div>
+        <div class="skel" style="height:11px;width:40%"></div>
       </div>
     </div>`).join('');
 
-  // Buscar precio Xpro y competencia en paralelo
-  const xproPromise = sku ? fetchXproPrice(sku).then(data => {
-    xproPrice = data.price || 0;
-    document.getElementById('xproName').textContent = data.name || sku;
-    document.getElementById('xproPrice').textContent = xproPrice > 0
-      ? `$ ${Math.round(xproPrice).toLocaleString('es-AR')}`
-      : 'Sin precio';
-  }) : Promise.resolve();
+  await Promise.all(activeSites.map(site => fetchSite(site, searchQuery)));
 
-  const competitionPromise = Promise.all(
-    activeSites.map(site => fetchSite(site, searchQuery))
-  );
-
-  await Promise.all([xproPromise, competitionPromise]);
-
-  // Re-render cards con comparativa ahora que tenemos xproPrice
-  activeSites.forEach(site => {
-    const cardEl = document.getElementById('card_' + site.id);
-    if (cardEl && cardEl._result) renderCard(cardEl, site, cardEl._result);
-  });
-
-  btn.disabled = false; btn.textContent = '🔍 Comparar precios';
+  btn.disabled=false; btn.textContent='🔍 Comparar precios';
 }
 
-async function fetchSite(site, query) {
-  const cardEl = document.getElementById('card_' + site.id);
+async function fetchSite(site, query){
+  const cardEl = document.getElementById('card_'+site.id);
   try {
     const res = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, sku: '', site })
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ query, site, minWords: 3 })
     });
     const result = await res.json();
-    cardEl._result = result;
+    // Agregar alertas
+    (result.products||[]).forEach(p => addCheaperAlert(p, site.name));
     renderCard(cardEl, site, result);
   } catch(e) {
-    renderCard(cardEl, site, { found: false, products: [], error: e.message });
+    renderCard(cardEl, site, {found:false, products:[], error:e.message});
   }
 }
 
-function renderCard(cardEl, site, result) {
-  const products = result.products || [];
-  const prices = products.map(p => p.price).filter(p => p > 0);
+function renderCard(cardEl, site, result){
+  const products = result.products||[];
+  const prices = products.map(p=>p.price).filter(p=>p>0);
   const minP = prices.length ? Math.min(...prices) : 0;
   const maxP = prices.length ? Math.max(...prices) : 0;
 
+  // Determinar pill
+  const hasCheaper = xproPrice && prices.some(p=>p<xproPrice);
   const pill = result.error
-    ? `<span class="card-pill" style="background:#2a1f0d;color:var(--accent)">error</span>`
-    : products.length > 0
-      ? site.isML ? `<span class="card-pill pill-ml">${products.length} resultados</span>`
-                  : `<span class="card-pill pill-ok">${products.length} encontrados</span>`
-      : `<span class="card-pill pill-none">sin resultados</span>`;
+    ? `<span class="pill" style="background:#2a1f0d;color:var(--warn)">error</span>`
+    : !products.length
+    ? `<span class="pill pill-none">sin resultados</span>`
+    : hasCheaper
+    ? `<span class="pill pill-alert">⚠ más barato</span>`
+    : site.isML
+    ? `<span class="pill pill-ml">${products.length} resultados</span>`
+    : `<span class="pill pill-ok">${products.length} encontrados</span>`;
 
-  let body = '';
-  if (result.error) {
-    body = `<p class="no-result-msg">Error al consultar.</p>`;
-  } else if (!products.length) {
-    body = `<p class="no-result-msg">Sin resultados en ${site.name}.</p>`;
+  let body='';
+  if(result.error){
+    body=`<p class="no-results">Error al consultar.</p>`;
+  } else if(!products.length){
+    body=`<p class="no-results">Sin resultados en ${site.name}.</p>`;
   } else {
-    const items = products.map((p, i) => {
-      let pc = '';
-      if (prices.length > 1) {
-        if (p.price > 0 && p.price <= minP*1.05) pc = 'cheap';
-        else if (p.price >= maxP*0.95) pc = 'expensive';
-      }
-      const priceStr = p.price > 0
-        ? `$ ${Math.round(p.price).toLocaleString('es-AR')}`
-        : `<span style="color:var(--muted);font-size:12px">Ver precio</span>`;
-
-      let diffHtml = '';
-      if (p.price > 0 && xproPrice > 0) {
-        const diff = Math.round(((xproPrice - p.price) / p.price) * 100);
-        if (Math.abs(diff) >= 2) {
-          diffHtml = diff > 0
-            ? `<span class="p-diff diff-up">Xpro +${diff}%</span>`
-            : `<span class="p-diff diff-down">Xpro ${diff}%</span>`;
+    const items = products.map((p,i)=>{
+      let priceClass='', diffHtml='', itemClass='';
+      if(p.price>0 && xproPrice>0){
+        const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
+        if(p.price < xproPrice){
+          priceClass='cheaper-price'; itemClass='cheaper';
+          diffHtml=`<span class="prod-diff diff-cheaper">-${diff}%</span>`;
+        } else if(Math.abs(diff)<=2){
+          priceClass='same';
+          diffHtml=`<span class="prod-diff diff-same">≈ igual</span>`;
         } else {
-          diffHtml = `<span class="p-diff diff-eq">≈ igual</span>`;
+          priceClass='pricier';
+          diffHtml=`<span class="prod-diff diff-pricier">+${diff}%</span>`;
         }
       }
-
+      const priceStr = p.price>0 ? fmt(p.price) : '<span class="ver-precio">Ver precio ↗</span>';
       const sub = [p.seller, p.condition].filter(Boolean).join(' · ');
-      return `<div class="product-item">
-        <div class="p-rank">${i+1}</div>
-        <div class="p-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
-        <div class="p-price ${pc}">${priceStr}</div>
-        ${diffHtml}
-        ${p.url?`<a href="${p.url}" target="_blank" class="p-link">↗</a>`:'<span></span>'}
+      return `<div class="prod-item ${itemClass}">
+        <div class="prod-rank">${i+1}</div>
+        <div class="prod-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
+        <div class="prod-price ${priceClass}">${priceStr}</div>
+        ${diffHtml||'<span></span>'}
+        ${p.url?`<a href="${p.url}" target="_blank" class="prod-link">↗</a>`:'<span></span>'}
       </div>`;
     }).join('');
-    body = `<div class="product-list">${items}</div>`;
-    if (prices.length) {
-      body += `<div class="card-summary">
-        <div class="cs-stat"><div class="v green">$ ${Math.round(minP).toLocaleString('es-AR')}</div><div class="l">Más bajo</div></div>
-        <div class="cs-stat"><div class="v red">$ ${Math.round(maxP).toLocaleString('es-AR')}</div><div class="l">Más alto</div></div>
-        ${prices.length>1?`<div class="cs-stat"><div class="v yellow">$ ${Math.round(prices.reduce((a,b)=>a+b,0)/prices.length).toLocaleString('es-AR')}</div><div class="l">Promedio</div></div>`:''}
-        ${xproPrice>0&&minP>0?`<div class="cs-stat"><div class="v ${xproPrice<=minP*1.05?'green':'red'}">${xproPrice<=minP*1.05?'✓ Competitivo':'↑ Más caro'}</div><div class="l">Xpro vs este sitio</div></div>`:''}
+    body=`<div class="prod-list">${items}</div>`;
+    if(prices.length){
+      const cheaper = xproPrice ? prices.filter(p=>p<xproPrice) : [];
+      body+=`<div class="card-footer">
+        <div class="cf-stat"><div class="v v-green">${fmt(minP)}</div><div class="l">Más bajo</div></div>
+        <div class="cf-stat"><div class="v v-red">${fmt(maxP)}</div><div class="l">Más alto</div></div>
+        ${prices.length>1?`<div class="cf-stat"><div class="v v-yellow">${fmt(prices.reduce((a,b)=>a+b,0)/prices.length)}</div><div class="l">Promedio</div></div>`:''}
+        ${xproPrice&&cheaper.length?`<div class="cf-stat"><div class="v v-red">⚠ ${cheaper.length} más ${cheaper.length===1?'barato':'baratos'}</div><div class="l">que Xpro</div></div>`:''}
+        ${xproPrice&&!cheaper.length&&prices.length?`<div class="cf-stat"><div class="v v-green">✓ Competitivo</div><div class="l">Xpro es el más barato</div></div>`:''}
       </div>`;
     }
   }
 
-  cardEl.innerHTML = `
-    <div class="card-header">
+  cardEl.innerHTML=`
+    <div class="card-head">
       <div class="card-site">
-        <img class="card-favicon" src="https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
         <div><div class="card-name">${site.name}</div><div class="card-url">${new URL(site.url).hostname}</div></div>
       </div>
       ${pill}
@@ -422,8 +482,9 @@ function renderCard(cardEl, site, result) {
     <div class="card-body">${body}</div>`;
 }
 
-document.getElementById('sku').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
-document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') runSearch(); });
+['sku','q','xproPriceInput'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
+});
 renderSites();
 renderSaved();
 </script>
