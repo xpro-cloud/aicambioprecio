@@ -187,7 +187,7 @@ async function serpSearch(q, serpKey) {
 }
 
 // ML via API oficial
-async function searchML(query, serpKey) {
+async function searchML(query, serpKey, brand) {
   const model = extractModel(query);
   const searchTerm = model || query;
   
@@ -204,6 +204,10 @@ async function searchML(query, serpKey) {
         .filter(p => !['funda','mueble','soporte','correa','estuche'].some(w => p.title.toLowerCase().startsWith(w)));
 
       // Filtrar por modelo si existe
+      if (brand) {
+        const withBrand = results.filter(p => p.title.toLowerCase().includes(brand.toLowerCase()));
+        if (withBrand.length > 0) results = withBrand;
+      }
       if (model) {
         const withModel = results.filter(p => titleContainsModel(p.title, model));
         if (withModel.length > 0) results = withModel;
@@ -230,9 +234,10 @@ async function searchML(query, serpKey) {
 
   // Fallback: SerpApi para ML
   console.log('ML fallback to SerpApi');
+  const brandTerm = brand ? brand : '';
   const searchQ = model
-    ? `site:mercadolibre.com.ar "${model}" -funda -mueble -soporte -correa`
-    : `site:mercadolibre.com.ar "${query}" -funda -mueble -soporte`;
+    ? `site:mercadolibre.com.ar ${brandTerm} "${model}" -funda -mueble -soporte -correa`
+    : `site:mercadolibre.com.ar ${brandTerm} "${query}" -funda -mueble -soporte`;
 
   const items = await serpSearch(searchQ, serpKey);
   if (!items.length) return { found: false, products: [] };
@@ -240,6 +245,7 @@ async function searchML(query, serpKey) {
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
+    .filter(item => !brand || item.title.toLowerCase().includes(brand.toLowerCase()))
     .filter(item => titleContainsModel(item.title, model));
 
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
@@ -262,15 +268,20 @@ async function searchML(query, serpKey) {
   return { found: valid.length > 0, products: valid };
 }
 
-async function searchSite(query, site, serpKey) {
+async function searchSite(query, site, serpKey, brand) {
   const hostname = new URL(site.url).hostname;
   const model = extractModel(query);
 
-  const searchQ = model ? `site:${hostname} "${model}"` : `site:${hostname} "${query.split(' ').slice(0,4).join(' ')}"`;
+  const brandTerm = brand ? brand : '';
+  const searchQ = model 
+    ? `site:${hostname} ${brandTerm} "${model}"`
+    : `site:${hostname} ${brandTerm} "${query.split(' ').slice(0,4).join(' ')}"`;
   let items = await serpSearch(searchQ, serpKey);
 
   if (!items.length) {
-    const fallQ = model ? `site:${hostname} ${model}` : `site:${hostname} ${query.split(' ').slice(0,3).join(' ')}`;
+    const fallQ = model 
+      ? `site:${hostname} ${brandTerm} ${model}`
+      : `site:${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
     items = await serpSearch(fallQ, serpKey);
   }
 
@@ -281,13 +292,14 @@ async function searchSite(query, site, serpKey) {
     .filter(item => isNavPage(item.title))
     .filter(item => {
       const lower = item.title.toLowerCase();
+      // Si hay marca, SIEMPRE debe estar en el título
+      if (brand && !lower.includes(brand.toLowerCase())) return false;
       if (model) {
-        // Si hay modelo alfanumérico, debe estar en el título
         return titleContainsModel(item.title, model);
       }
-      // Sin modelo: exigir al menos 3 palabras del query en el título
+      // Sin modelo: exigir al menos 2 palabras del query en el título
       const matches = queryWords.filter(w => lower.includes(w)).length;
-      return matches >= Math.min(3, queryWords.length);
+      return matches >= Math.min(2, queryWords.length);
     });
 
   if (!filtered.length) return { found: false, products: [] };
@@ -337,7 +349,7 @@ exports.handler = async function(event) {
   try { parsed = JSON.parse(event.body || '{}'); }
   catch(e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid body' }) }; }
 
-  const { query, site, xproPrice } = parsed;
+  const { query, site, xproPrice, brand } = parsed;
   const serpKey = process.env.SERP_API_KEY;
   const model = extractModel(query || '');
   console.log('Query:', query, '| Model:', model, '| Site:', site?.name);
@@ -347,8 +359,8 @@ exports.handler = async function(event) {
 
   try {
     let result = site.isML
-      ? await searchML(query, serpKey)
-      : await searchSite(query, site, serpKey);
+      ? await searchML(query, serpKey, brand)
+      : await searchSite(query, site, serpKey, brand);
     
     // Sanitizar precios irreales usando el precio de Xpro como referencia
     if (result.products && xproPrice) {
