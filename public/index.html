@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI CAMBIÓ EL PRECIO! · Xpro</title>
+<title>AI cambió de precio · Xpro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -35,6 +35,482 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px}
 input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
 input:focus{border-color:var(--accent2)}
+::placeholder{color:var(--muted)}
+
+/* SITES */
+.sites-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.slabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace}
+.btn-sm{background:transparent;border:1px dashed var(--border);color:var(--muted);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-sm:hover{border-color:var(--accent2);color:var(--accent2)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px}
+.chip.ml{border-color:#554a00;color:#ffe600}
+.chip input[type=checkbox]{accent-color:var(--accent);width:12px;height:12px;cursor:pointer}
+.chip-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;margin-left:2px}
+.chip-del:hover{color:var(--danger)}
+.add-row{display:none;gap:8px;margin-top:8px;align-items:flex-end}
+.add-row.show{display:flex}
+.add-row .field{flex:1}
+.btn-add{background:var(--accent2);color:#fff;border:none;padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* SAVED */
+.saved{margin-top:14px;display:none}
+.saved.show{display:block}
+.saved-chips{display:flex;flex-wrap:wrap;gap:6px}
+.saved-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s}
+.saved-chip:hover{border-color:var(--accent);color:var(--accent)}
+.saved-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 0 0 3px}
+
+/* SEARCH BTN */
+.btn-search{width:100%;background:var(--accent);color:#000;border:none;padding:12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn-search:hover{background:#e09520}
+.btn-search:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+
+/* XPRO PRICE BANNER */
+.xpro-bar{background:var(--surface);border:1px solid var(--accent2);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.xpro-bar.show{display:flex}
+.xpro-info{display:flex;flex-direction:column;gap:3px}
+.xpro-name{font-size:14px;font-weight:500}
+.xpro-sku{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.xpro-right{display:flex;align-items:center;gap:16px}
+.xpro-price-wrap{text-align:right}
+.xpro-price{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--accent)}
+.xpro-price-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.xpro-link{color:var(--accent2);text-decoration:none;font-size:12px;white-space:nowrap}
+.xpro-link:hover{text-decoration:underline}
+
+/* ALERT BANNER */
+.alert-bar{background:#2a0a0a;border:1px solid var(--danger);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:none}
+.alert-bar.show{display:block}
+.alert-bar h3{font-size:14px;color:var(--danger);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.alert-items{display:flex;flex-direction:column;gap:6px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;background:#1a0505;border:1px solid #3a1515;border-radius:8px;padding:8px 12px}
+.alert-item-left h4{font-size:13px;font-weight:400;margin-bottom:2px}
+.alert-item-left p{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.alert-item-right{text-align:right;flex-shrink:0}
+.alert-price{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--danger)}
+.alert-diff{font-size:11px;color:#ff8888;font-family:'DM Mono',monospace}
+.alert-link{color:var(--danger);text-decoration:none;font-size:16px;margin-left:8px}
+
+/* RESULTS */
+.results{display:none}
+.results.show{display:block}
+.results-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.results-title{font-size:17px;font-weight:500}
+.results-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.results-grid{display:grid;gap:10px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.card-site{display:flex;align-items:center;gap:8px}
+.favicon{width:16px;height:16px;border-radius:3px}
+.card-name{font-size:13px;font-weight:500}
+.card-url{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.pill{font-size:10px;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace}
+.pill-loading{background:var(--surface);color:var(--muted);border:1px solid var(--border);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.pill-ok{background:#0d2a1f;color:var(--success)}
+.pill-none{background:#1a1015;color:var(--muted)}
+.pill-ml{background:#2a2500;color:#ffe600;border:1px solid #554a00}
+.pill-alert{background:#2a0a0a;color:var(--danger);border:1px solid #3a1515}
+.card-body{padding:14px 16px}
+
+/* PRODUCT LIST */
+.prod-list{display:flex;flex-direction:column;gap:7px}
+.prod-item{display:grid;grid-template-columns:18px 1fr auto auto auto;gap:10px;align-items:center;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.prod-item.cheaper{border-color:#3a1515;background:#150505}
+.prod-rank{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center}
+.prod-info h4{font-size:12px;font-weight:400;line-height:1.4;margin-bottom:1px}
+.prod-info p{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace}
+.prod-price{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;white-space:nowrap;text-align:right}
+.prod-price.cheaper-price{color:var(--danger)}
+.prod-price.same{color:var(--muted)}
+.prod-price.pricier{color:var(--success)}
+.prod-diff{font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap;padding:2px 5px;border-radius:4px}
+.diff-cheaper{background:#2a0a0a;color:var(--danger)}
+.diff-same{background:var(--surface);color:var(--muted)}
+.diff-pricier{background:#0a2a15;color:var(--success)}
+.prod-link{color:var(--muted);text-decoration:none;font-size:15px}
+.prod-link:hover{color:var(--accent)}
+.ver-precio{color:var(--muted);font-size:11px}
+
+.card-footer{display:flex;gap:18px;flex-wrap:wrap;padding:10px 16px;background:var(--surface2);border-top:1px solid var(--border)}
+.cf-stat .v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500}
+.cf-stat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.v-green{color:var(--success)}
+.v-red{color:var(--danger)}
+.v-yellow{color:var(--accent)}
+
+.no-results{font-size:13px;color:var(--muted)}
+.global-summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-top:16px}
+.gs-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:14px}
+.gs-stats{display:flex;gap:24px;flex-wrap:wrap;align-items:center}
+.gs-stat .v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
+.gs-stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.skel{background:var(--surface2);border-radius:6px;background-image:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+@media(max-width:600px){.main{padding:16px}.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">💰</div>
+    <div>
+      <div class="logo-text">AI cambió de precio</div>
+      <div class="logo-sub">Monitor · Xpro</div>
+    </div>
+  </div>
+  <span style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"><span class="dot"></span>activo</span>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-title">Comparar precio con la competencia</div>
+    <div class="panel-sub">Podés buscar por SKU, por nombre del producto, o ambos. Si ingresás el precio de Xpro, la herramienta alerta automáticamente cuando alguien está más barato.</div>
+
+    <div class="fields">
+      <div class="field">
+        <label>SKU Xpro</label>
+        <input type="text" id="sku" placeholder="250-8210-533" />
+      </div>
+      <div class="field">
+        <label>Nombre del producto</label>
+        <input type="text" id="q" placeholder="Gretsch G5232T Electromatic Double Jet" />
+      </div>
+      <div class="field">
+        <label>Precio Xpro ($)</label>
+        <input type="number" id="xproPriceInput" placeholder="1490000" />
+      </div>
+    </div>
+
+    <div class="sites-row">
+      <span class="slabel">Sitios a comparar</span>
+      <button class="btn-sm" onclick="toggleAdd()">+ Agregar sitio</button>
+    </div>
+    <div class="chips" id="chipsGrid"></div>
+    <div class="add-row" id="addRow">
+      <div class="field"><label>URL</label><input type="text" id="newUrl" placeholder="https://sitio.com.ar" /></div>
+      <div class="field"><label>Nombre</label><input type="text" id="newName" placeholder="Nombre" /></div>
+      <button class="btn-add" onclick="addSite()">Agregar</button>
+    </div>
+
+    <div class="saved" id="savedWrap">
+      <div class="slabel" style="margin-bottom:8px">Búsquedas recientes</div>
+      <div class="saved-chips" id="savedChips"></div>
+    </div>
+
+    <button class="btn-search" id="btnSearch" onclick="runSearch()">🔍 Comparar precios</button>
+  </div>
+
+  <!-- XPRO BANNER -->
+  <div class="xpro-bar" id="xproBar">
+    <div class="xpro-info">
+      <div class="xpro-name" id="xproName">—</div>
+      <div class="xpro-sku" id="xproSkuLabel">—</div>
+    </div>
+    <div class="xpro-right">
+      <div class="xpro-price-wrap">
+        <div class="xpro-price-label">Precio Xpro</div>
+        <div class="xpro-price" id="xproPriceDisplay">—</div>
+      </div>
+      <a class="xpro-link" id="xproLink" href="#" target="_blank">Ver en tienda ↗</a>
+    </div>
+  </div>
+
+  <!-- ALERT BANNER -->
+  <div class="alert-bar" id="alertBar">
+    <h3>⚠️ Competidores más baratos que Xpro</h3>
+    <div class="alert-items" id="alertItems"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="resultsWrap">
+    <div class="results-header">
+      <div class="results-title" id="resultsTitle"></div>
+      <div class="results-time" id="resultsTime"></div>
+    </div>
+    <div class="results-grid" id="resultsGrid"></div>
+    <div class="global-summary" id="globalSummary" style="display:none">
+      <div class="gs-title">Resumen de la competencia</div>
+      <div class="gs-stats" id="gsStats"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_SITES = [
+  {id:'ml',   name:'Mercado Libre', url:'https://www.mercadolibre.com.ar', enabled:true, isML:true},
+  {id:'larp', name:'Larpon',        url:'https://larpon.com.ar',           enabled:true},
+  {id:'todo', name:'Todo Música',   url:'https://todomusica.com.ar',       enabled:true},
+  {id:'mario',name:'Mario Gomez',   url:'https://mariogomez.com.ar',       enabled:true},
+  {id:'tecno',name:'Tecnowestune',  url:'https://www.tecnowestune.com',    enabled:true},
+  {id:'fusa', name:'La Fusa',       url:'https://www.lafusa.com.ar',       enabled:true},
+];
+
+let sites = JSON.parse(localStorage.getItem('xpm_sites')||'null') || DEFAULT_SITES;
+let saved = JSON.parse(localStorage.getItem('xpm_saved')||'[]');
+let xproPrice = 0;
+let allCheaper = [];
+let allPrices = []; // todos los precios de la competencia
+
+function saveSites(){ localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
+
+function renderSites(){
+  document.getElementById('chipsGrid').innerHTML = sites.map(s=>`
+    <div class="chip ${s.isML?'ml':''}">
+      <input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSite('${s.id}',this.checked)">
+      ${s.name}
+      ${!s.isML?`<button class="chip-del" onclick="removeSite('${s.id}')">×</button>`:''}
+    </div>`).join('');
+}
+function toggleSite(id,val){ sites=sites.map(s=>s.id===id?{...s,enabled:val}:s); saveSites(); }
+function removeSite(id){ sites=sites.filter(s=>s.id!==id); saveSites(); renderSites(); }
+function toggleAdd(){ document.getElementById('addRow').classList.toggle('show'); }
+function addSite(){
+  const url=document.getElementById('newUrl').value.trim();
+  const name=document.getElementById('newName').value.trim();
+  if(!url||!name) return;
+  sites.push({id:'c_'+Date.now(),name,url,enabled:true});
+  saveSites(); renderSites();
+  ['newUrl','newName'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('addRow').classList.remove('show');
+}
+
+function renderSaved(){
+  const wrap=document.getElementById('savedWrap');
+  if(!saved.length){ wrap.classList.remove('show'); return; }
+  wrap.classList.add('show');
+  document.getElementById('savedChips').innerHTML=saved.map((s,i)=>`
+    <div class="saved-chip" onclick="loadSaved(${i})">
+      ${[s.sku,s.q].filter(Boolean).join(' · ')}
+      <button class="saved-del" onclick="delSaved(event,${i})">×</button>
+    </div>`).join('');
+}
+function loadSaved(i){
+  document.getElementById('sku').value=saved[i].sku||'';
+  document.getElementById('q').value=saved[i].q||'';
+  document.getElementById('xproPriceInput').value=saved[i].xproPrice||'';
+  runSearch();
+}
+function delSaved(e,i){
+  e.stopPropagation();
+  saved.splice(i,1);
+  localStorage.setItem('xpm_saved',JSON.stringify(saved));
+  renderSaved();
+}
+
+function fmt(n){ return '$ '+Math.round(n).toLocaleString('es-AR'); }
+
+function renderGlobalSummary(){
+  if(!allPrices.length) return;
+  const gs = document.getElementById('globalSummary');
+  const minP = Math.min(...allPrices);
+  const maxP = Math.max(...allPrices);
+  const avg = Math.round(allPrices.reduce((a,b)=>a+b,0)/allPrices.length);
+  const cheaper = xproPrice ? allPrices.filter(p=>p<xproPrice) : [];
+  gs.style.display='block';
+  document.getElementById('gsStats').innerHTML = `
+    <div class="gs-stat"><div class="v v-green">${fmt(minP)}</div><div class="l">Más bajo</div></div>
+    <div class="gs-stat"><div class="v v-red">${fmt(maxP)}</div><div class="l">Más alto</div></div>
+    ${allPrices.length>1?`<div class="gs-stat"><div class="v v-yellow">${fmt(avg)}</div><div class="l">Promedio</div></div>`:''}
+    ${xproPrice?`<div class="gs-stat"><div class="v" style="color:var(--accent)">${fmt(xproPrice)}</div><div class="l">Precio Xpro</div></div>`:''}
+    ${xproPrice&&cheaper.length?`<div class="gs-stat"><div class="v v-red">⚠ ${cheaper.length} sitio${cheaper.length>1?'s':''} más barato${cheaper.length>1?'s':''}</div><div class="l">que Xpro</div></div>`:''}
+    ${xproPrice&&!cheaper.length?`<div class="gs-stat"><div class="v v-green">✓ Competitivo</div><div class="l">Xpro es el más barato</div></div>`:''}
+  `;
+}
+
+function addCheaperAlert(product, siteName){
+  if(!product.price) return;
+  allPrices.push(product.price);
+  if(xproPrice && product.price < xproPrice){
+    allCheaper.push({...product, siteName});
+    renderAlerts();
+  }
+  renderGlobalSummary();
+}
+
+function renderAlerts(){
+  const bar = document.getElementById('alertBar');
+  const items = document.getElementById('alertItems');
+  if(!allCheaper.length || !xproPrice){ bar.classList.remove('show'); return; }
+
+  // Ordenar por precio más barato primero, mostrar top 3
+  const sorted = [...allCheaper].sort((a,b)=>a.price-b.price).slice(0,3);
+  bar.classList.add('show');
+  items.innerHTML = sorted.map(p=>{
+    const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
+    return `<div class="alert-item">
+      <div class="alert-item-left">
+        <h4>${p.title}</h4>
+        <p>${p.siteName}</p>
+      </div>
+      <div class="alert-item-right" style="display:flex;align-items:center;gap:8px">
+        <div>
+          <div class="alert-price">${fmt(p.price)}</div>
+          <div class="alert-diff">${diff}% más barato</div>
+        </div>
+        ${p.url?`<a href="${p.url}" target="_blank" class="alert-link">↗</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function runSearch(){
+  const sku = document.getElementById('sku').value.trim();
+  const q = document.getElementById('q').value.trim();
+  const priceInput = document.getElementById('xproPriceInput').value.trim();
+
+  if(!sku && !q){ document.getElementById('q').focus(); return; }
+
+  // Determinar query de búsqueda en competencia
+  const searchQuery = q || sku;
+
+  // Precio Xpro
+  xproPrice = priceInput ? parseInt(priceInput.replace(/[.,]/g,'')) : 0;
+  allCheaper = [];
+
+  // Guardar en historial
+  saved = saved.filter(s=>!(s.sku===sku&&s.q===q));
+  saved.unshift({sku, q, xproPrice: priceInput});
+  if(saved.length>12) saved.pop();
+  localStorage.setItem('xpm_saved', JSON.stringify(saved));
+  renderSaved();
+
+  const btn = document.getElementById('btnSearch');
+  btn.disabled=true; btn.textContent='Buscando...';
+
+  // Mostrar banner Xpro
+  if(sku || xproPrice){
+    document.getElementById('xproBar').classList.add('show');
+    document.getElementById('xproName').textContent = q || sku;
+    document.getElementById('xproSkuLabel').textContent = sku ? `SKU: ${sku}` : '';
+    document.getElementById('xproPriceDisplay').textContent = xproPrice ? fmt(xproPrice) : 'Sin precio';
+    document.getElementById('xproLink').href = sku ? `https://ar.xprostore.com/${sku}` : '#';
+  }
+
+  // Reset alertas y resultados
+  document.getElementById('alertBar').classList.remove('show');
+  document.getElementById('alertItems').innerHTML='';
+  document.getElementById('resultsTitle').textContent = `"${searchQuery}"`;
+  document.getElementById('resultsTime').textContent = new Date().toLocaleTimeString('es-AR');
+  document.getElementById('resultsWrap').classList.add('show');
+
+  const activeSites = sites.filter(s=>s.enabled);
+
+  // Skeletons
+  document.getElementById('resultsGrid').innerHTML = activeSites.map(s=>`
+    <div class="card" id="card_${s.id}">
+      <div class="card-head">
+        <div class="card-site">
+          <img class="favicon" src="https://www.google.com/s2/favicons?domain=${new URL(s.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+          <div><div class="card-name">${s.name}</div><div class="card-url">${new URL(s.url).hostname}</div></div>
+        </div>
+        <span class="pill pill-loading">buscando...</span>
+      </div>
+      <div class="card-body">
+        <div class="skel" style="height:13px;width:70%;margin-bottom:7px"></div>
+        <div class="skel" style="height:11px;width:40%"></div>
+      </div>
+    </div>`).join('');
+
+  await Promise.all(activeSites.map(site => fetchSite(site, searchQuery)));
+
+  btn.disabled=false; btn.textContent='🔍 Comparar precios';
+}
+
+async function fetchSite(site, query){
+  const cardEl = document.getElementById('card_'+site.id);
+  try {
+    const res = await fetch('/api/search', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ query, site, minWords: 3 })
+    });
+    const result = await res.json();
+    // Agregar alertas
+    (result.products||[]).forEach(p => addCheaperAlert(p, site.name));
+    renderCard(cardEl, site, result);
+  } catch(e) {
+    renderCard(cardEl, site, {found:false, products:[], error:e.message});
+  }
+}
+
+function renderCard(cardEl, site, result){
+  const products = result.products||[];
+  const prices = products.map(p=>p.price).filter(p=>p>0);
+  const minP = prices.length ? Math.min(...prices) : 0;
+  const maxP = prices.length ? Math.max(...prices) : 0;
+
+  // Determinar pill
+  const hasCheaper = xproPrice && prices.some(p=>p<xproPrice);
+  const pill = result.error
+    ? `<span class="pill" style="background:#2a1f0d;color:var(--warn)">error</span>`
+    : !products.length
+    ? `<span class="pill pill-none">sin resultados</span>`
+    : hasCheaper
+    ? `<span class="pill pill-alert">⚠ más barato</span>`
+    : site.isML
+    ? `<span class="pill pill-ml">${products.length} resultados</span>`
+    : `<span class="pill pill-ok">${products.length} encontrados</span>`;
+
+  let body='';
+  if(result.error){
+    body=`<p class="no-results">Error al consultar.</p>`;
+  } else if(!products.length){
+    body=`<p class="no-results">Sin resultados en ${site.name}.</p>`;
+  } else {
+    const items = products.map((p,i)=>{
+      let priceClass='', diffHtml='', itemClass='';
+      if(p.price>0 && xproPrice>0){
+        const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
+        if(p.price < xproPrice){
+          priceClass='cheaper-price'; itemClass='cheaper';
+          diffHtml=`<span class="prod-diff diff-cheaper">-${diff}%</span>`;
+        } else if(Math.abs(diff)<=2){
+          priceClass='same';
+          diffHtml=`<span class="prod-diff diff-same">≈ igual</span>`;
+        } else {
+          priceClass='pricier';
+          diffHtml=`<span class="prod-diff diff-pricier">+${diff}%</span>`;
+        }
+      }
+      const priceStr = p.price>0 ? fmt(p.price) : '<span class="ver-precio">Ver precio ↗</span>';
+      const sub = [p.seller, p.condition].filter(Boolean).join(' · ');
+      return `<div class="prod-item ${itemClass}">
+        <div class="prod-rank">${i+1}</div>
+        <div class="prod-info"><h4>${p.title}</h4>${sub?`<p>${sub}</p>`:''}</div>
+        <div class="prod-price ${priceClass}">${priceStr}</div>
+        ${diffHtml||'<span></span>'}
+        ${p.url?`<a href="${p.url}" target="_blank" class="prod-link">↗</a>`:'<span></span>'}
+      </div>`;
+    }).join('');
+    body=`<div class="prod-list">${items}</div>`;
+
+  }
+
+  cardEl.innerHTML=`
+    <div class="card-head">
+      <div class="card-site">
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=32" onerror="this.style.visibility='hidden'">
+        <div><div class="card-name">${site.name}</div><div class="card-url">${new URL(site.url).hostname}</div></div>
+      </div>
+      ${pill}
+    </div>
+    <div class="card-body">${body}</div>`;
+}
+
+['sku','q','xproPriceInput'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
+});
+renderSites();
+renderSaved();
+</script>
+</body>
+</html>input:focus{border-color:var(--accent2)}
 ::placeholder{color:var(--muted)}
 
 /* SITES */
