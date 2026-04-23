@@ -64,10 +64,10 @@ function isReasonablePrice(price, referencePrice) {
   if (!price || price <= 0) return false;
   if (price > 99000000) return false;
   if (!referencePrice) return price > 1000;
-  // Aceptar precios entre 40% y 300% del precio de referencia
-  // Esto evita cuotas (muy bajo) y errores de parsing (muy alto)
-  const min = referencePrice * 0.40;
-  const max = referencePrice * 3.00;
+  // Aceptar precios entre 30% y 400% del precio de referencia
+  // Rango amplio para sanitizar, luego postProcessProducts filtra a ±35%
+  const min = referencePrice * 0.30;
+  const max = referencePrice * 4.00;
   return price >= min && price <= max;
 }
 
@@ -386,11 +386,9 @@ function postProcessProducts(products, referencePrice) {
     .filter(p => {
       if (!p.price) return true; // sin precio lo mostramos igual (Ver precio)
       if (!referencePrice) return true;
-      // Filtrar productos fuera del rango ±20% del precio Xpro
-      // Salvo que sea mas barato (eso siempre se muestra como alerta)
+      // Mostrar productos dentro del rango ±35% del precio Xpro
       const ratio = p.price / referencePrice;
-      // Mostrar si está entre 20% más barato y 120% más caro
-      return ratio >= 0.20 && ratio <= 1.20;
+      return ratio >= 0.65 && ratio <= 1.35;
     });
 }
 
