@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI cambió de precio · Xpro</title>
+<title>AI CAMBIÓ DE PRECIO! · Xpro</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -160,7 +160,7 @@ input:focus{border-color:var(--accent2)}
   <div class="logo">
     <div class="logo-icon">💰</div>
     <div>
-      <div class="logo-text">AI cambió de precio</div>
+      <div class="logo-text">AI CAMBIÓ DE PRECIO! </div>
       <div class="logo-sub">Monitor · Xpro</div>
     </div>
   </div>
@@ -478,14 +478,17 @@ function renderCard(cardEl, site, result){
     const items = products.map((p,i)=>{
       let priceClass='', diffHtml='', itemClass='';
       if(p.price>0 && xproPrice>0){
-        const diff = Math.round(((xproPrice-p.price)/xproPrice)*100);
-        if(p.price < xproPrice){
+        const diff = Math.round(((p.price - xproPrice)/xproPrice)*100);
+        if(diff < -2){
+          // Más barato que Xpro — ROJO
           priceClass='cheaper-price'; itemClass='cheaper';
-          diffHtml=`<span class="prod-diff diff-cheaper">-${diff}%</span>`;
+          diffHtml=`<span class="prod-diff diff-cheaper">${diff}%</span>`;
         } else if(Math.abs(diff)<=2){
+          // Igual — GRIS
           priceClass='same';
           diffHtml=`<span class="prod-diff diff-same">≈ igual</span>`;
         } else {
+          // Más caro que Xpro — VERDE
           priceClass='pricier';
           diffHtml=`<span class="prod-diff diff-pricier">+${diff}%</span>`;
         }
