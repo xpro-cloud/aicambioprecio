@@ -24,35 +24,48 @@ function httpsGet(url) {
 }
 
 function extractPrice(text) {
-  const cleaned = text.replace(/\./g, '').replace(/,/g, '.');
-  const patterns = [
-    /\$\s*([\d]{4,}(?:\.\d{1,2})?)/g,
-  ];
+  // Normalizar separadores argentinos: punto=miles, coma=decimal
+  // "$1.951.262,94" -> 1951262
+  // "$1.490.000" -> 1490000
   const prices = [];
-  for (const pattern of patterns) {
-    for (const m of [...cleaned.matchAll(pattern)]) {
-      const p = parseFloat(m[1]);
-      if (p > 5000 && p < 100000000) prices.push(Math.round(p));
+
+  // Patrón con puntos de miles y coma decimal (formato argentino)
+  const arPattern = /\$\s*([\d]{1,3}(?:\.[\d]{3})+(?:,\d{1,2})?)/g;
+  for (const m of [...text.matchAll(arPattern)]) {
+    const p = Math.round(parseFloat(m[1].replace(/\./g, '').replace(',', '.')));
+    if (p > 5000 && p < 100000000) prices.push(p);
+  }
+
+  // Patrón simple sin separadores
+  if (!prices.length) {
+    const simplePattern = /\$\s*([\d]{4,})/g;
+    for (const m of [...text.matchAll(simplePattern)]) {
+      const p = parseInt(m[1]);
+      if (p > 5000 && p < 100000000) prices.push(p);
     }
   }
+
   return prices.length > 0 ? Math.min(...prices) : 0;
 }
 
-// Verificar si un título coincide con al menos N palabras del query
-function titleMatchesQuery(title, query, minWords) {
-  const queryWords = query.toLowerCase()
-    .split(/\s+/)
-    .filter(w => w.length > 2);
-  const titleLower = title.toLowerCase();
-  const matches = queryWords.filter(w => titleLower.includes(w)).length;
-  return matches >= Math.min(minWords, queryWords.length);
+// Extraer modelo alfanumérico del query (ej: "G5232T" de "Gretsch G5232T Electromatic")
+function extractModel(query) {
+  const match = query.match(/\b([A-Z]{1,5}[\d]{2,}[A-Z\d\-]*|[\d]{2,}[A-Z]{1,5}[\w\-]*)\b/i);
+  return match ? match[1] : null;
 }
 
-function isNavigationPage(title) {
+function titleMatchesQuery(title, query, minWords) {
+  const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const lower = title.toLowerCase();
+  const matches = words.filter(w => lower.includes(w)).length;
+  return matches >= Math.min(minWords, words.length);
+}
+
+function isNavPage(title) {
   if (/\(\d+\)$/.test(title.trim())) return false;
   if (title.split(' ').length < 3) return false;
   const lower = title.toLowerCase();
-  const bad = ['ver todo', 'todos los', 'bienvenidos', 'inicio', 'home', 'todas las guitarras', 'instrumentos de cuerdas', 'mejores precios siempre'];
+  const bad = ['ver todo', 'todos los', 'bienvenidos', 'todas las guitarras', 'instrumentos de cuerdas', 'mejores precios siempre', 'home'];
   return !bad.some(w => lower.includes(w));
 }
 
@@ -64,56 +77,26 @@ async function serpSearch(q, serpKey) {
   return data.organic_results || [];
 }
 
-async function searchSite(query, site, serpKey, minWords) {
-  const hostname = new URL(site.url).hostname;
+async function searchML(query, serpKey) {
+  const model = extractModel(query);
 
-  // Búsqueda con las primeras 3-4 palabras clave entre comillas para mayor precisión
-  const keywords = query.split(/\s+/).filter(w => w.length > 2).slice(0, 4).join(' ');
-  const searchQuery = `site:${hostname} "${keywords}"`;
+  // Buscar con modelo exacto entre comillas para ML
+  const searchQ = model
+    ? `site:mercadolibre.com.ar "${model}" -funda -mueble -soporte -correa`
+    : `site:mercadolibre.com.ar "${query}" -funda -mueble -soporte`;
 
-  let items = await serpSearch(searchQuery, serpKey);
-
-  // Si no hay resultados con comillas, intentar sin
-  if (!items.length) {
-    items = await serpSearch(`site:${hostname} ${keywords}`, serpKey);
-  }
-
+  const items = await serpSearch(searchQ, serpKey);
   if (!items.length) return { found: false, products: [] };
 
   const products = items
-    .filter(item => isNavigationPage(item.title))
-    .filter(item => titleMatchesQuery(item.title, query, minWords))
-    .map(item => {
-      const text = (item.title || '') + ' ' + (item.snippet || '');
-      const price = extractPrice(text);
-      return {
-        title: item.title.replace(/\s*[-|·].*$/, '').trim(),
-        price,
-        currency: 'ARS',
-        url: item.link,
-        condition: 'Nuevo'
-      };
-    })
-    .filter(p => p.title.length > 2)
-    .slice(0, 5);
-
-  return { found: products.length > 0, products };
-}
-
-async function searchML(query, serpKey, minWords) {
-  const keywords = query.split(/\s+/).filter(w => w.length > 2).slice(0, 4).join(' ');
-  const searchQuery = `site:mercadolibre.com.ar "${keywords}" -funda -mueble -soporte -correa -estuche`;
-
-  const items = await serpSearch(searchQuery, serpKey);
-  if (!items.length) return { found: false, products: [] };
-
-  const products = items
-    .filter(item => isNavigationPage(item.title))
-    .filter(item => titleMatchesQuery(item.title, query, minWords))
+    .filter(item => isNavPage(item.title))
     .filter(item => {
       const lower = item.title.toLowerCase();
       return !['funda', 'mueble', 'soporte', 'correa', 'estuche'].some(w => lower.startsWith(w));
     })
+    // Si tenemos modelo, filtrar por él
+    .filter(item => !model || item.title.toLowerCase().includes(model.toLowerCase().replace(/[-\s]/g, '').split('').join('[-\\s]?')) || 
+      item.title.toLowerCase().replace(/[-\s]/g, '').includes(model.toLowerCase().replace(/[-\s]/g, '')))
     .map(item => {
       const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
                         item.rich_snippet?.bottom?.detected_extensions?.price || 0;
@@ -135,6 +118,51 @@ async function searchML(query, serpKey, minWords) {
   return { found: products.length > 0, products };
 }
 
+async function searchSite(query, site, serpKey, minWords) {
+  const hostname = new URL(site.url).hostname;
+  const model = extractModel(query);
+
+  // Buscar con modelo exacto entre comillas
+  const searchQ = model
+    ? `site:${hostname} "${model}"`
+    : `site:${hostname} "${query.split(' ').slice(0,4).join(' ')}"`;
+
+  let items = await serpSearch(searchQ, serpKey);
+
+  // Fallback sin comillas
+  if (!items.length) {
+    const fallbackQ = model
+      ? `site:${hostname} ${model}`
+      : `site:${hostname} ${query.split(' ').slice(0,4).join(' ')}`;
+    items = await serpSearch(fallbackQ, serpKey);
+  }
+
+  if (!items.length) return { found: false, products: [] };
+
+  const products = items
+    .filter(item => isNavPage(item.title))
+    .filter(item => titleMatchesQuery(item.title, query, minWords))
+    .map(item => {
+      // Intentar rich snippet primero
+      const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
+                        item.rich_snippet?.bottom?.detected_extensions?.price || 0;
+      const price = richPrice > 0
+        ? Math.round(richPrice)
+        : extractPrice((item.title || '') + ' ' + (item.snippet || ''));
+      return {
+        title: item.title.replace(/\s*[-|·].*$/, '').trim(),
+        price,
+        currency: 'ARS',
+        url: item.link,
+        condition: 'Nuevo'
+      };
+    })
+    .filter(p => p.title.length > 2)
+    .slice(0, 5);
+
+  return { found: products.length > 0, products };
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -147,19 +175,18 @@ exports.handler = async function(event) {
   const { query, site, minWords = 3 } = parsed;
   const serpKey = process.env.SERP_API_KEY;
 
-  console.log('Query:', query, '| Site:', site?.name, '| minWords:', minWords);
+  console.log('Query:', query, '| Site:', site?.name, '| Model:', extractModel(query));
 
   if (!query || !site) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Faltan parametros' }) };
   }
-
   if (!serpKey) {
     return { statusCode: 500, body: JSON.stringify({ error: 'SERP_API_KEY no configurada' }) };
   }
 
   try {
     const result = site.isML
-      ? await searchML(query, serpKey, minWords)
+      ? await searchML(query, serpKey)
       : await searchSite(query, site, serpKey, minWords);
 
     return {
