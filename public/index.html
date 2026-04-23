@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .panel-title{font-size:17px;font-weight:500;margin-bottom:4px}
 .panel-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
 
-.fields{display:grid;grid-template-columns:160px 1fr 160px;gap:10px;margin-bottom:18px}
+.fields{display:grid;grid-template-columns:140px 150px 1fr 150px;gap:10px;margin-bottom:18px}
 .field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px}
 input[type=text],input[type=number]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
 input:focus{border-color:var(--accent2)}
@@ -151,7 +151,7 @@ input:focus{border-color:var(--accent2)}
 .skel{background:var(--surface2);border-radius:6px;background-image:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-@media(max-width:600px){.main{padding:16px}.fields{grid-template-columns:1fr}}
+@media(max-width:600px){.main{padding:16px}.fields{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -178,8 +178,12 @@ input:focus{border-color:var(--accent2)}
         <input type="text" id="sku" placeholder="250-8210-533" />
       </div>
       <div class="field">
-        <label>Nombre del producto</label>
-        <input type="text" id="q" placeholder="Gretsch G5232T Electromatic Double Jet" />
+        <label>Marca</label>
+        <input type="text" id="brand" placeholder="Squier · Yamaha · RCF" />
+      </div>
+      <div class="field">
+        <label>Nombre / Modelo</label>
+        <input type="text" id="q" placeholder="Affinity Stratocaster · PSRE473" />
       </div>
       <div class="field">
         <label>Precio Xpro ($)</label>
@@ -256,6 +260,7 @@ let saved = JSON.parse(localStorage.getItem('xpm_saved')||'[]');
 let xproPrice = 0;
 let allCheaper = [];
 let allPrices = []; // todos los precios de la competencia
+let currentBrand = '';
 
 function saveSites(){ localStorage.setItem('xpm_sites', JSON.stringify(sites)); }
 
@@ -286,7 +291,7 @@ function renderSaved(){
   wrap.classList.add('show');
   document.getElementById('savedChips').innerHTML=saved.map((s,i)=>`
     <div class="saved-chip" onclick="loadSaved(${i})">
-      ${[s.sku,s.q].filter(Boolean).join(' · ')}
+      ${[s.sku,s.brand,s.q].filter(Boolean).join(' · ')}
       <button class="saved-del" onclick="delSaved(event,${i})">×</button>
     </div>`).join('');
 }
@@ -361,13 +366,15 @@ function renderAlerts(){
 
 async function runSearch(){
   const sku = document.getElementById('sku').value.trim();
+  const brand = document.getElementById('brand').value.trim();
   const q = document.getElementById('q').value.trim();
   const priceInput = document.getElementById('xproPriceInput').value.trim();
+  currentBrand = brand;
 
   if(!sku && !q){ document.getElementById('q').focus(); return; }
 
   // Determinar query de búsqueda en competencia
-  const searchQuery = q || sku;
+  const searchQuery = [brand, q].filter(Boolean).join(' ') || sku;
 
   // Precio Xpro
   xproPrice = priceInput ? parseInt(priceInput.replace(/[.,]/g,'')) : 0;
@@ -428,7 +435,7 @@ async function fetchSite(site, query){
     const res = await fetch('/api/search', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ query, site, xproPrice })
+      body: JSON.stringify({ query, site, xproPrice, brand: currentBrand })
     });
     const result = await res.json();
     // Agregar alertas
@@ -503,7 +510,7 @@ function renderCard(cardEl, site, result){
     <div class="card-body">${body}</div>`;
 }
 
-['sku','q','xproPriceInput'].forEach(id=>{
+['sku','brand','q','xproPriceInput'].forEach(id=>{
   document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
 });
 renderSites();
