@@ -241,9 +241,13 @@ async function searchML(query, serpKey, brand, modelField) {
   // Fallback SerpApi — solo URLs de producto directo, nunca listados
   console.log('ML fallback to SerpApi');
   const brandTerm = brand || '';
-  const serpQ = model
-    ? `site:mercadolibre.com.ar ${brandTerm} "${model}" -funda -mueble -soporte -correa`
-    : `site:mercadolibre.com.ar ${brandTerm} "${query}" -funda -mueble -soporte`;
+  const mlModelHasBrand = brand && normalizeStr(modelField || model || '').includes(normalizeStr(brand));
+  const mlBrand = mlModelHasBrand ? '' : brandTerm;
+  const serpQ = modelField
+    ? `site:mercadolibre.com.ar ${mlBrand} "${modelField}" -funda -mueble -soporte -correa`.trim()
+    : model
+    ? `site:mercadolibre.com.ar ${mlBrand} "${model}" -funda -mueble -soporte -correa`.trim()
+    : `site:mercadolibre.com.ar ${mlBrand} "${query}" -funda -mueble -soporte`.trim();
 
   const items = await serpSearch(serpQ, serpKey);
   if (!items.length) return { found: false, products: [] };
@@ -292,23 +296,27 @@ async function searchSite(query, site, serpKey, brand, modelField) {
   const model = extractModel(query);
   const brandTerm = brand || '';
 
-  const searchQ = model
-    ? `site:${hostname} ${brandTerm} "${model}"`
-    : `site:${hostname} ${brandTerm} "${query.split(' ').slice(0,4).join(' ')}"`;
+  // Evitar duplicar marca si ya está en el modelo o query
+  const modelHasBrand = brand && normalizeStr(modelField || '').includes(normalizeStr(brand));
+  const effectiveBrand = modelHasBrand ? '' : brandTerm;
+  
+  const searchQ = modelField
+    ? `site:${hostname} ${effectiveBrand} "${modelField}"`.trim()
+    : `site:${hostname} ${effectiveBrand} "${query.split(' ').slice(0,4).join(' ')}"`.trim();
   let items = await serpSearch(searchQ, serpKey);
 
   if (!items.length) {
-    const fallQ = model
-      ? `site:${hostname} ${brandTerm} ${model}`
-      : `site:${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
+    const fallQ = modelField
+      ? `site:${hostname} ${effectiveBrand} ${modelField}`.trim()
+      : `site:${hostname} ${effectiveBrand} ${query.split(' ').slice(0,3).join(' ')}`.trim();
     items = await serpSearch(fallQ, serpKey);
   }
 
   // Segundo fallback sin site: — útil para sitios que Google no indexa bien
   if (!items.length) {
-    const domainQ = model
-      ? `${hostname} ${brandTerm} ${model}`
-      : `${hostname} ${brandTerm} ${query.split(' ').slice(0,3).join(' ')}`;
+    const domainQ = modelField
+      ? `${hostname} ${effectiveBrand} ${modelField}`.trim()
+      : `${hostname} ${effectiveBrand} ${query.split(' ').slice(0,3).join(' ')}`.trim();
     const domainItems = await serpSearch(domainQ, serpKey);
     items = domainItems.filter(item => item.link && item.link.includes(hostname));
   }
