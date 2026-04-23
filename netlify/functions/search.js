@@ -1,7 +1,7 @@
 const https = require('https');
 const http = require('http');
 
-function httpGet(url, maxBytes) {
+function httpGet(url, maxBytes, asJson) {
   return new Promise((resolve, reject) => {
     try {
       const urlObj = new URL(url);
@@ -12,7 +12,7 @@ function httpGet(url, maxBytes) {
         method: 'GET',
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
+          'Accept': asJson ? 'application/json' : 'text/html,application/xhtml+xml,*/*;q=0.9',
           'Accept-Language': 'es-AR,es;q=0.9',
         }
       };
@@ -20,57 +20,42 @@ function httpGet(url, maxBytes) {
         if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
           const loc = res.headers.location;
           const next = loc.startsWith('http') ? loc : `${urlObj.origin}${loc}`;
-          return httpGet(next, maxBytes).then(resolve).catch(reject);
+          return httpGet(next, maxBytes, asJson).then(resolve).catch(reject);
         }
         let data = '';
         let bytes = 0;
         res.on('data', chunk => {
           bytes += chunk.length;
           data += chunk;
-          if (maxBytes && bytes > maxBytes) { req.destroy(); resolve(data); }
+          if (maxBytes && bytes > maxBytes) { req.destroy(); resolve(asJson ? JSON.parse(data) : data); }
         });
-        res.on('end', () => resolve(data));
+        res.on('end', () => {
+          if (asJson) { try { resolve(JSON.parse(data)); } catch(e) { reject(e); } }
+          else resolve(data);
+        });
       });
       req.on('error', reject);
-      req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
+      req.setTimeout(12000, () => { req.destroy(); reject(new Error('Timeout')); });
       req.end();
     } catch(e) { reject(e); }
   });
 }
 
-function httpsGetJson(url) {
-  return new Promise((resolve, reject) => {
-    const urlObj = new URL(url);
-    const options = {
-      hostname: urlObj.hostname,
-      path: urlObj.pathname + urlObj.search,
-      method: 'GET',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; XproMonitor/1.0)' }
-    };
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('Invalid JSON')); }
-      });
-    });
-    req.on('error', reject);
-    req.setTimeout(15000, () => { req.destroy(); reject(new Error('Timeout')); });
-    req.end();
-  });
+function parseArgentinePrice(str) {
+  const clean = str.trim();
+  if (clean.includes(',')) {
+    const [intPart] = clean.split(',');
+    return parseInt(intPart.replace(/\./g, ''));
+  }
+  return parseInt(clean.replace(/\./g, ''));
 }
 
-// Extraer precio del HTML de una página — maneja formatos argentinos correctamente
 function extractPriceFromHtml(html) {
   const prices = [];
-
-  // 1. Meta tags (más confiable)
   const metaPatterns = [
     /itemprop="price"[^>]*content="([\d.,]+)"/i,
     /"price"\s*:\s*"([\d.,]+)"/,
     /data-price="([\d.,]+)"/i,
-    /class="[^"]*price[^"]*"[^>]*>\s*\$?\s*([\d.,]+)/i,
   ];
   for (const p of metaPatterns) {
     const m = html.match(p);
@@ -79,41 +64,15 @@ function extractPriceFromHtml(html) {
       if (val > 5000 && val < 100000000) { prices.push(val); break; }
     }
   }
-
-  // 2. Buscar en el texto plano del HTML
   if (!prices.length) {
-    // Remover scripts y estilos para evitar falsos positivos
-    const cleanHtml = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-                          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-    
-    // Formato argentino: $1.658.573,50 o $1.658.573
+    const clean = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
     const arPattern = /\$\s*([\d]{1,3}(?:\.[\d]{3})+(?:,\d{1,2})?)/g;
-    for (const m of [...cleanHtml.matchAll(arPattern)]) {
+    for (const m of [...clean.matchAll(arPattern)]) {
       const val = parseArgentinePrice(m[1]);
       if (val > 10000 && val < 100000000) prices.push(val);
     }
   }
-
   return prices.length > 0 ? Math.min(...prices) : 0;
-}
-
-// Parsear precio en formato argentino: punto=miles, coma=decimal
-function parseArgentinePrice(str) {
-  // "1.658.573,50" -> 1658573.50 -> 1658574
-  // "1.658.573" -> 1658573
-  // "16.585.735" -> 16585735 (si no tiene coma, es ambiguo — tomar como está)
-  const clean = str.trim();
-  
-  // Si tiene coma al final, es decimal argentino
-  if (clean.includes(',')) {
-    const [intPart, decPart] = clean.split(',');
-    const integer = parseInt(intPart.replace(/\./g, ''));
-    const decimal = parseFloat('0.' + decPart);
-    return Math.round(integer + decimal);
-  }
-  
-  // Sin coma: los puntos son separadores de miles
-  return parseInt(clean.replace(/\./g, ''));
 }
 
 function extractPriceFromText(text) {
@@ -128,13 +87,12 @@ function extractPriceFromText(text) {
 
 async function fetchPriceFromPage(url) {
   try {
-    console.log('Fetching:', url);
-    const html = await httpGet(url, 200000);
+    const html = await httpGet(url, 200000, false);
     const price = extractPriceFromHtml(html);
-    console.log('Fetched price:', price, 'from', url);
+    console.log('Page price:', price, 'from', url.slice(0, 60));
     return price;
   } catch(e) {
-    console.log('Fetch error:', e.message, 'for', url);
+    console.log('Fetch error:', e.message);
     return 0;
   }
 }
@@ -165,13 +123,55 @@ function isNavPage(title) {
 async function serpSearch(q, serpKey) {
   const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(q)}&api_key=${serpKey}&num=10&gl=ar&hl=es`;
   console.log('SerpApi:', q);
-  const data = await httpsGetJson(url);
+  const data = await httpGet(url, null, true);
   console.log('Results:', data.organic_results?.length || 0, data.error || '');
   return data.organic_results || [];
 }
 
+// ML via API oficial
 async function searchML(query, serpKey) {
   const model = extractModel(query);
+  const searchTerm = model || query;
+  
+  console.log('ML API search:', searchTerm);
+  try {
+    const url = `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(searchTerm)}&limit=10&sort=relevance`;
+    const data = await httpGet(url, null, true);
+    
+    if (data.results && data.results.length > 0) {
+      console.log('ML API results:', data.results.length);
+      
+      let results = data.results
+        .filter(p => p.available_quantity > 0) // solo con stock
+        .filter(p => !['funda','mueble','soporte','correa','estuche'].some(w => p.title.toLowerCase().startsWith(w)));
+
+      // Filtrar por modelo si existe
+      if (model) {
+        const withModel = results.filter(p => titleContainsModel(p.title, model));
+        if (withModel.length > 0) results = withModel;
+      }
+
+      const products = results.slice(0, 5).map(p => ({
+        title: p.title,
+        price: Math.round(p.price),
+        currency: p.currency_id,
+        url: p.permalink,
+        seller: p.seller?.nickname || '',
+        condition: p.condition === 'new' ? 'Nuevo' : 'Usado'
+      }));
+
+      if (products.length > 0) {
+        console.log('ML API products:', products.length, products[0]?.title, products[0]?.price);
+        return { found: true, products };
+      }
+    }
+    console.log('ML API error or no results:', data.error || data.message);
+  } catch(e) {
+    console.log('ML API failed:', e.message);
+  }
+
+  // Fallback: SerpApi para ML
+  console.log('ML fallback to SerpApi');
   const searchQ = model
     ? `site:mercadolibre.com.ar "${model}" -funda -mueble -soporte -correa`
     : `site:mercadolibre.com.ar "${query}" -funda -mueble -soporte`;
@@ -182,36 +182,24 @@ async function searchML(query, serpKey) {
   const filtered = items
     .filter(item => isNavPage(item.title))
     .filter(item => !['funda','mueble','soporte','correa','estuche'].some(w => item.title.toLowerCase().startsWith(w)))
-    .filter(item => titleContainsModel(item.title, model))
-    .filter(item => item.link && !item.link.includes('/s?'))
-    // Solo publicaciones directas de MLA (Argentina) — excluir MLAU (Uruguay), MLAC, listados
-    .filter(item => {
-      const link = item.link || '';
-      if (link.includes('MLAU') || link.includes('listado.mercadolibre')) return false;
-      return true;
-    });
+    .filter(item => titleContainsModel(item.title, model));
 
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
     const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
                       item.rich_snippet?.bottom?.detected_extensions?.price || 0;
     let price = richPrice > 0 ? Math.round(richPrice)
               : extractPriceFromText((item.title||'') + ' ' + (item.snippet||''));
-    // Para ML siempre hacer fetch para verificar stock y precio real
-    if (item.link) {
-      const fetched = await fetchPriceFromPage(item.link);
-      if (fetched > 0) price = fetched;
-    }
+    if (!price && item.link) price = await fetchPriceFromPage(item.link);
     return {
       title: item.title.replace(/\s*[-|·]\s*Mercado.*$/i, '').trim(),
       price,
       currency: 'ARS',
       url: item.link,
-      seller: item.displayed_link || '',
-      condition: item.snippet?.toLowerCase().includes('usado') ? 'Usado' : 'Nuevo'
+      seller: '',
+      condition: 'Nuevo'
     };
   }));
 
-  // Filtrar productos sin precio — probablemente sin stock o pausados
   const valid = products.filter(p => p.title.length > 2 && p.price > 0);
   return { found: valid.length > 0, products: valid };
 }
@@ -240,7 +228,6 @@ async function searchSite(query, site, serpKey) {
 
   if (!filtered.length) return { found: false, products: [] };
 
-  // Fetch precio directo de cada página
   const products = await Promise.all(filtered.slice(0, 4).map(async item => {
     const richPrice = item.rich_snippet?.top?.detected_extensions?.price ||
                       item.rich_snippet?.bottom?.detected_extensions?.price || 0;
